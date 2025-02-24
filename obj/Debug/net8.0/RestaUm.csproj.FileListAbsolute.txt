@@ -1,0 +1,14 @@
+D:\Meus Documentos\Dev\Nova pasta\restaUm\bin\Debug\net8.0\RestaUm.exe
+D:\Meus Documentos\Dev\Nova pasta\restaUm\bin\Debug\net8.0\RestaUm.deps.json
+D:\Meus Documentos\Dev\Nova pasta\restaUm\bin\Debug\net8.0\RestaUm.runtimeconfig.json
+D:\Meus Documentos\Dev\Nova pasta\restaUm\bin\Debug\net8.0\RestaUm.dll
+D:\Meus Documentos\Dev\Nova pasta\restaUm\bin\Debug\net8.0\RestaUm.pdb
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.GeneratedMSBuildEditorConfig.editorconfig
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.AssemblyInfoInputs.cache
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.AssemblyInfo.cs
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.csproj.CoreCompileInputs.cache
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.dll
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\refint\RestaUm.dll
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.pdb
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.genruntimeconfig.cache
+D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\ref\RestaUm.dll
