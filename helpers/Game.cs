@@ -2,13 +2,13 @@ namespace RestaUm.helpers;
 
 public class Game
 {
-    public static List<(int, int)> directions = new()
-    {
+    public static List<(int, int)> directions =
+    [
         (0, 2),  // Right
         (0, -2), // Left
         (2, 0),  // Down
         (-2, 0)  // Up
-    };
+    ];
 
     public static bool IsValidMove(int[,] board, int x, int y, int dx, int dy)
     {
@@ -55,15 +55,5 @@ public class Game
             }
             Console.WriteLine();
         }
-    }
-
-    public static int CountPegs(int[,] board)
-    {
-        int count = 0;
-        for (int i = 0; i < 7; i++)
-            for (int j = 0; j < 7; j++)
-                if (board[i, j] == 1)
-                    count++;
-        return count;
     }
 }

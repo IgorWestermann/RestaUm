@@ -1,5 +1,4 @@
-﻿using RestaUm.helpers;
-using RestaUm.Helpers;
+﻿using RestaUm.Helpers;
 
 int[,] board = new int[7, 7]
 {
@@ -14,6 +13,12 @@ int[,] board = new int[7, 7]
 
 Helpers.PrintBoard(board);
 
-int pegCount = Game.CountPegs(board);
+int pegCount = Heuristica.CountPegs(board);
+int distance = Heuristica.Distance(board); ;
 
-AEstrela.Solve(board, pegCount);
+Console.WriteLine("Heuristica CountPegs");
+Algorithm.AStar(board, pegCount);
+// Console.WriteLine("Heuristica Distance");
+// Algorithm.AStar(board, distance);
+// Console.WriteLine("BestFirstSearch");
+// Algorithm.BestFirstSearch(board);

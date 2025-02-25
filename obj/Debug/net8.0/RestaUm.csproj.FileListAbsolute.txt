@@ -12,3 +12,4 @@ D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\refint\RestaUm.dll
 D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.pdb
 D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.genruntimeconfig.cache
 D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\ref\RestaUm.dll
+D:\Meus Documentos\Dev\Nova pasta\RestaUm\obj\Debug\net8.0\RestaUm.sourcelink.json

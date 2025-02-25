@@ -1,26 +1,11 @@
 namespace RestaUm
 {
-    public class Node
+    public class Node(int[,] state, Node parent, (int, int, int, int) action, int pathCost, int heuristicValue)
     {
-        public int[,] Board { get; set; }
-        public int PegCount { get; set; }
-        public int MovesSoFar { get; set; }
-        public int HeuristicValue { get; set; }
-        public List<Node> Path { get; set; }
-
-        public Node(int[,] board, int pegCount, int movesSoFar, List<Node> path)
-        {
-            Board = (int[,])board.Clone();
-            PegCount = pegCount;
-            MovesSoFar = movesSoFar;
-            HeuristicValue = movesSoFar + Heuristic(pegCount); // f(n) = g(n) + h(n)
-            Path = new List<Node>(path);
-            Path.Add(this);
-        }
-
-        private int Heuristic(int pegCount)
-        {
-            return pegCount;
-        }
+        public int[,] State { get; set; } = (int[,])state.Clone();
+        public Node Parent { get; set; } = parent;
+        public (int, int, int, int) Action { get; set; } = action;
+        public int PathCost { get; set; } = pathCost;
+        public int HeuristicValue { get; set; } = heuristicValue;
     }
 }
