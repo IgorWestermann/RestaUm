@@ -16,9 +16,7 @@ Helpers.PrintBoard(board);
 int pegCount = Heuristica.CountPegs(board);
 int distance = Heuristica.Distance(board); ;
 
-Console.WriteLine("Heuristica CountPegs");
-Algorithm.AStar(board, pegCount);
-// Console.WriteLine("Heuristica Distance");
-// Algorithm.AStar(board, distance);
-// Console.WriteLine("BestFirstSearch");
-// Algorithm.BestFirstSearch(board);
+// Console.WriteLine("Heuristica CountPegs");
+// Algorithm.AStar(board, pegCount);
+Console.WriteLine("BestFirstSearch");
+Algorithm.BestFirstSearch(board);
