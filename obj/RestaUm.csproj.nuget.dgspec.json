@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Meus Documentos\\Dev\\Nova pasta\\RestaUm\\RestaUm.csproj": {}
+    "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\RestaUm.csproj": {}
   },
   "projects": {
-    "D:\\Meus Documentos\\Dev\\Nova pasta\\RestaUm\\RestaUm.csproj": {
+    "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\RestaUm.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Meus Documentos\\Dev\\Nova pasta\\RestaUm\\RestaUm.csproj",
+        "projectUniqueName": "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\RestaUm.csproj",
         "projectName": "RestaUm",
-        "projectPath": "D:\\Meus Documentos\\Dev\\Nova pasta\\RestaUm\\RestaUm.csproj",
-        "packagesPath": "C:\\Users\\iwest\\.nuget\\packages\\",
-        "outputPath": "D:\\Meus Documentos\\Dev\\Nova pasta\\RestaUm\\obj\\",
+        "projectPath": "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\RestaUm.csproj",
+        "packagesPath": "C:\\Users\\hugo_\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\iwest\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\hugo_\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -40,7 +44,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -61,7 +66,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
