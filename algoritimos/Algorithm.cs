@@ -204,7 +204,7 @@ public class Algorithm
     // Implementação da Busca A* com heurística de centralidade
     public static bool AStarCentrality(int[,] initialBoard, out Node rootNode) {
         // Estado inicial: custo 0 e heurística de centralidade
-        rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, Heuristica.Distance(initialBoard));
+        rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, Heuristica.Centrality(initialBoard));
 
         // Fila de prioridade com prioridade definida por f(n) = g(n) + h(n)
         var frontier = new PriorityQueue<Node, int>();
