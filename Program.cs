@@ -75,3 +75,12 @@ Node root = null;
 //Backtracking
 //Console.WriteLine("Busca Backtracking");
 //Algorithm.SolveBacktracking(board, pegCount);
+
+//Console.WriteLine("Algoritmo de profundidade");
+//Algorithm.DepthFirstSearch(board, pegCount);
+
+//Console.WriteLine("Algoritmo de largura");
+//Algorithm.BreadthFirstSearch(board, pegCount);
+
+//Console.WriteLine("Algoritmo de largura otimizado");
+//PegSolitaireOptimized.OptimizedBFSBitmask(board, pegCount);
