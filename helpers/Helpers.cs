@@ -98,6 +98,21 @@ namespace RestaUm.Helpers
             return mobility;
         }
 
-    }
-};
+    //Metodo que retorna pontos para a quantidade de pinos no tabuleiro
+    public static int caculePoints(int[,] board) {
+        int pegCount = 0;
+        int distToCenter = 0;
 
+        for (int x = 0; x < 7; x++) {
+            for (int y = 0; y < 7; y++) {
+                if (board[x, y] == 1) {
+                    pegCount++;
+                    distToCenter += Math.Abs(x - 3) + Math.Abs(y - 3);
+                }
+            }
+        }
+        return Math.Abs(pegCount + distToCenter - 121);
+
+    }
+
+}
