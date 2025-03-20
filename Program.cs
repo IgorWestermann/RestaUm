@@ -18,6 +18,24 @@ int pegCount = Heuristica.CountPegs(board);
 int distance = Heuristica.Distance(board);
 Node root = null;
 
+
+//int[,] boardTeste = new int[7, 7]
+//{
+//    { -1, -1, 0, 0, 0,-1,-1 },
+//    { -1, -1, 0, 0, 0,-1,-1 },
+//    {  0,  0, 0, 0, 0, 0, 0 },
+//    {  0,  0, 0, 0, 0, 0, 0 },
+//    {  0,  0, 0, 0, 0, 0, 0 },
+//    { -1, -1, 0, 0, 0,-1,-1 },
+//    { -1, -1, 0, 1, 0,-1,-1 },
+//};
+
+//Helpers.PrintBoard(boardTeste);
+
+//int x = Helpers.caculePoints(board);
+//Console.WriteLine("Cout matriz = " + x);
+
+
 //Console.WriteLine("Heuristica CountPegs");
 //Algorithm.AStar(board, pegCount);
 
