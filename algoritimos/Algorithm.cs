@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 public class Algorithm
 {
+    //TODO: Nao usar
     public static bool AStar(int[,] initialBoard, int initialPegCount)
     {
         var queue = new PriorityQueue<State, int>();
@@ -67,6 +68,7 @@ public class Algorithm
         return false;
     }
 
+    //TODO: Nao usar
     // Implementação do Algoritimo Guloso, com a Heuristic de contar pecas
     public static bool BestFirstSearch(int[,] initialBoard)
     {
@@ -91,6 +93,7 @@ public class Algorithm
                 Console.WriteLine("Solution found!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentNode.State)}");
                 return true;
             }
 
@@ -157,6 +160,8 @@ public class Algorithm
                 Console.WriteLine("Solution found with Ordered Search using Centrality and Future Mobility tie-breaker!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentNode.State)}");
+
                 return true;
             }
 
@@ -196,7 +201,6 @@ public class Algorithm
     }
 
 
-
     // Implementação da Busca A* com heurística de centralidade
     public static bool AStarCentrality(int[,] initialBoard, out Node rootNode) {
         // Estado inicial: custo 0 e heurística de centralidade
@@ -219,6 +223,7 @@ public class Algorithm
                 Console.WriteLine("Solution found with A* (Centrality Heuristic)!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentNode.State)}");
                 return true;
             }
 
@@ -276,6 +281,7 @@ public class Algorithm
                 Console.WriteLine("Solution found with Greedy Search (Centrality Heuristic)!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentNode.State)}");
                 return true;
             }
 
@@ -311,8 +317,8 @@ public class Algorithm
     }
 
     // Implementação do A* com Heurística de Centralidade Ponderada.
-    // f(n) = g(n) + weight * h(n), onde:
-    //   - g(n) é o custo acumulado (PathCost)
+    // g(n) = f(n) + weight * h(n), onde:
+    //   - f(n) é o custo acumulado (PathCost)
     //   - h(n) é a heurística, definida aqui como a centralidade (soma das distâncias Manhattan dos pinos até o centro)
     public static bool AStarWeightedCentrality(int[,] initialBoard, double weight) {
         // Calcula a heurística inicial (centralidade) para o tabuleiro
@@ -324,7 +330,7 @@ public class Algorithm
         var frontier = new PriorityQueue<Node, double>();
         var explored = new HashSet<string>();
 
-        // A prioridade é f(n) = g(n) + weight * h(n)
+        // A prioridade é g(n) = f(n) + weight * h(n)
         frontier.Enqueue(rootNode, rootNode.PathCost + weight * rootNode.HeuristicValue);
 
         int iteration = 0;
@@ -337,6 +343,7 @@ public class Algorithm
                 Console.WriteLine("Solution found with AStarWeightedCentrality!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentNode.State)}");
                 return true;
             }
 
@@ -398,6 +405,7 @@ public class Algorithm
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Console.WriteLine("\nSolution found!");
                 Helpers.PrintBoard(currentState.Board);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentState.Board)}");
                 return true;
             }
 
@@ -462,6 +470,7 @@ public class Algorithm
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Console.WriteLine("\nSolution found!");
                 Helpers.PrintBoard(currentState.Board);
+                Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(currentState.Board)}");
                 return true;
             }
 
@@ -515,6 +524,7 @@ public class Algorithm
             Console.WriteLine("Solution found!");
             Helpers.PrintBoard(board);
             Console.WriteLine($"\n--- Iterations: {iterationCount} ---");
+            Console.WriteLine($"Pontos Solução: {Helpers.caculePoints(board)}");
             return true;
         }
 
@@ -557,142 +567,5 @@ public class Algorithm
             Console.WriteLine($"\n--- Iterations: {iterationCount} ---");
 
         return result;
-    }
-}
-
-// Busca em largura com bitMask e pré-computação dos movimentos, pra tentar ser mais otimizado
-public struct Move
-{
-    public int from;
-    public int mid;
-    public int to;
-    public Move(int from, int mid, int to)
-    {
-        this.from = from;
-        this.mid = mid;
-        this.to = to;
-    }
-}
-
-public struct StateBitmask
-{
-    public long Bitmask;
-    public int PegCount;
-    public int MovesSoFar;
-
-    public StateBitmask(long bitmask, int pegCount, int movesSoFar)
-    {
-        Bitmask = bitmask;
-        PegCount = pegCount;
-        MovesSoFar = movesSoFar;
-    }
-}
-
-public static class PegSolitaireOptimized
-{
-    // Lista de todos os movimentos possíveis pré-computados
-    public static List<Move> PrecomputedMoves = GenerateMoves();
-
-    // Gera a lista de movimentos válidos para um tabuleiro 7x7
-    public static List<Move> GenerateMoves()
-    {
-        var moves = new List<Move>();
-        int rows = 7, cols = 7;
-        // Direções: cima, baixo, esquerda, direita
-        int[,] directions = new int[,] { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                int fromIndex = i * cols + j;
-                for (int d = 0; d < directions.GetLength(0); d++)
-                {
-                    int dx = directions[d, 0];
-                    int dy = directions[d, 1];
-                    int midI = i + dx;
-                    int midJ = j + dy;
-                    int toI = i + 2 * dx;
-                    int toJ = j + 2 * dy;
-                    if (midI >= 0 && midI < rows && midJ >= 0 && midJ < cols &&
-                        toI >= 0 && toI < rows && toJ >= 0 && toJ < cols)
-                    {
-                        int midIndex = midI * cols + midJ;
-                        int toIndex = toI * cols + toJ;
-                        moves.Add(new Move(fromIndex, midIndex, toIndex));
-                    }
-                }
-            }
-        }
-        return moves;
-    }
-
-    // Converte o tabuleiro (matriz 7x7) para uma bitmask (long)
-    public static long BoardToBitmask(int[,] board)
-    {
-        long bitmask = 0;
-        int rows = board.GetLength(0);
-        int cols = board.GetLength(1);
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                if (board[i, j] == 1)
-                    bitmask |= (1L << (i * cols + j));
-            }
-        }
-        return bitmask;
-    }
-
-    // Algoritmo BFS otimizado utilizando bitmask e movimentos pré-computados
-    public static bool OptimizedBFSBitmask(int[,] initialBoard, int initialPegCount)
-    {
-        Queue<StateBitmask> queue = new Queue<StateBitmask>();
-        HashSet<long> visited = new HashSet<long>();
-
-        long initialMask = BoardToBitmask(initialBoard);
-        visited.Add(initialMask);
-        queue.Enqueue(new StateBitmask(initialMask, initialPegCount, 0));
-
-        int iteration = 0;
-        while (queue.Count > 0)
-        {
-            iteration++;
-            var currentState = queue.Dequeue();
-
-            if (currentState.PegCount == 1)
-            {
-                Console.WriteLine($"Solution found in {iteration} iterations with {currentState.MovesSoFar} moves.");
-                // Opcional: converter o bitmask de volta para uma matriz para exibir o tabuleiro
-                return true;
-            }
-
-            // Testa cada movimento pré-computado
-            foreach (var move in PrecomputedMoves)
-            {
-                // Verifica se o movimento é válido:
-                // Deve existir pino na posição 'from' e 'mid', e a posição 'to' deve estar vazia.
-                if (((currentState.Bitmask >> move.from) & 1L) == 1 &&
-                    ((currentState.Bitmask >> move.mid) & 1L) == 1 &&
-                    ((currentState.Bitmask >> move.to) & 1L) == 0)
-                {
-                    long newMask = currentState.Bitmask;
-                    // Remove o pino da posição 'from' e da posição 'mid'
-                    newMask &= ~(1L << move.from);
-                    newMask &= ~(1L << move.mid);
-                    // Coloca o pino na posição 'to'
-                    newMask |= (1L << move.to);
-
-                    if (!visited.Contains(newMask))
-                    {
-                        visited.Add(newMask);
-                        queue.Enqueue(new StateBitmask(newMask, currentState.PegCount - 1, currentState.MovesSoFar + 1));
-                    }
-                }
-            }
-        }
-
-        Console.WriteLine("No solution found.");
-        return false;
     }
 }

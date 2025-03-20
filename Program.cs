@@ -19,30 +19,6 @@ int distance = Heuristica.Distance(board);
 Node root = null;
 
 
-//int[,] boardTeste = new int[7, 7]
-//{
-//    { -1, -1, 0, 0, 0,-1,-1 },
-//    { -1, -1, 0, 0, 0,-1,-1 },
-//    {  0,  0, 0, 0, 0, 0, 0 },
-//    {  0,  0, 0, 0, 0, 0, 0 },
-//    {  0,  0, 0, 0, 0, 0, 0 },
-//    { -1, -1, 0, 0, 0,-1,-1 },
-//    { -1, -1, 0, 1, 0,-1,-1 },
-//};
-
-//Helpers.PrintBoard(boardTeste);
-
-//int x = Helpers.caculePoints(board);
-//Console.WriteLine("Cout matriz = " + x);
-
-
-//Console.WriteLine("Heuristica CountPegs");
-//Algorithm.AStar(board, pegCount);
-
-//Console.WriteLine("Guloso com Heuristica CountPegs");
-//Algorithm.BestFirstSearch(board);
-
-
 /* A*
 */
 //Console.WriteLine("Heuristica Centralidade, para o Aloritimo A*");
@@ -81,6 +57,3 @@ Node root = null;
 
 //Console.WriteLine("Algoritmo de largura");
 //Algorithm.BreadthFirstSearch(board, pegCount);
-
-//Console.WriteLine("Algoritmo de largura otimizado");
-//PegSolitaireOptimized.OptimizedBFSBitmask(board, pegCount);
