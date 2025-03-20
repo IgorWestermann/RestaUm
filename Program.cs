@@ -32,7 +32,17 @@ while (executando)
     Console.WriteLine("5. SolveBacktracking");
     Console.WriteLine("6. DepthFirstSearch");
     Console.WriteLine("7. BreadthFirstSearch");
-    Console.WriteLine("8. Limpar console");
+    Console.WriteLine("8. Greedy Best First Search - CountPegs");
+    Console.WriteLine("9. Greedy Best First Search - Distance");
+    Console.WriteLine("10. Greedy Best First Search - Connectivity");
+    Console.WriteLine("11. Greedy Best First Search - Centrality");
+    Console.WriteLine("12. Greedy Best First Search - Centrality With Penality");
+    Console.WriteLine("13. A* - CountPegs");
+    Console.WriteLine("14. A* - Distance");
+    Console.WriteLine("15. A* - Connectivity");
+    Console.WriteLine("16. A* - Centrality");
+    Console.WriteLine("17. A* - Centrality With Penality");
+    Console.WriteLine("99. Limpar console");
     Console.WriteLine("00. Sair");
     Console.Write("Escolha uma opção: ");
 
@@ -90,19 +100,20 @@ while (executando)
             break;
 
         case "8":
-            BestFirstSearchSolver.Solve(board, Heuristica.CountPegs, "Best First Search - CountPegs");
+            BestFirstSearchSolver.Solve(board, Heuristica.CountPegs, "Best First Search - CountPegs", out root);
+            Helpers.ExportSearchTreeToDOT(root, "greedyBFS.dot");
             break;
         case "9":
-            BestFirstSearchSolver.Solve(board, Heuristica.Distance, "Best First Search - Distance");
+            BestFirstSearchSolver.Solve(board, Heuristica.Distance, "Best First Search - Distance", out root);
             break;
         case "10":
-            BestFirstSearchSolver.Solve(board, Heuristica.Connectivity, "Best First Search - Connectivity");
+            BestFirstSearchSolver.Solve(board, Heuristica.Connectivity, "Best First Search - Connectivity", out root);
             break;
         case "11":
-            BestFirstSearchSolver.Solve(board, Heuristica.Centrality, "Best First Search - Centrality");
+            BestFirstSearchSolver.Solve(board, Heuristica.Centrality, "Best First Search - Centrality", out root);
             break;
         case "12":
-            BestFirstSearchSolver.Solve(board, Heuristica.CentralityWhitPenality, "Best First Search - CentralityWhitPenality");
+            BestFirstSearchSolver.Solve(board, Heuristica.CentralityWhitPenality, "Best First Search - CentralityWhitPenality", out root);
             break;
         case "13":
             AStarSolver.Solve(board, Heuristica.CountPegs, "A* - CountPegs");
@@ -121,11 +132,11 @@ while (executando)
             break;
 
 
-        case "98":
+        case "99":
             Console.Clear();
             break;
 
-        case "99":
+        case "00":
             executando = false;
             Console.WriteLine("Encerrando o aplicativo...");
             break;
