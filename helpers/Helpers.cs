@@ -96,7 +96,7 @@ public class Helpers {
                 }
             }
         }
-        return Math.Abs(pegCount + distToCenter - 120);
+        return Math.Abs(pegCount + distToCenter - 121);
 
     }
 
