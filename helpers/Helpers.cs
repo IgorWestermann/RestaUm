@@ -84,6 +84,7 @@ public class Helpers {
     }
 
     //Metodo que retorna pontos para a quantidade de pinos no tabuleiro
+    //Metodo que retorna pontos para a quantidade de pinos no tabuleiro
     public static int caculePoints(int[,] board) {
         int pegCount = 0;
         int distToCenter = 0;
@@ -96,7 +97,7 @@ public class Helpers {
                 }
             }
         }
-        return Math.Abs(pegCount + distToCenter - 121);
+        return Math.Abs((pegCount * 10) + distToCenter - 410);
 
     }
 
