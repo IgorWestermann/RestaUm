@@ -1,6 +1,6 @@
-﻿using System;
+﻿using RestaUm;
+using RestaUm.algoritimos;
 using RestaUm.Helpers;
-using RestaUm;
 
 int[,] board = new int[7, 7]
 {
@@ -33,7 +33,7 @@ while (executando)
     Console.WriteLine("6. DepthFirstSearch");
     Console.WriteLine("7. BreadthFirstSearch");
     Console.WriteLine("8. Limpar console");
-    Console.WriteLine("9. Sair");
+    Console.WriteLine("00. Sair");
     Console.Write("Escolha uma opção: ");
 
     string? opcao = Console.ReadLine();
@@ -89,12 +89,43 @@ while (executando)
             Console.WriteLine("BreadthFirstSearch executado.");
             break;
 
-
         case "8":
+            BestFirstSearchSolver.Solve(board, Heuristica.CountPegs, "Best First Search - CountPegs");
+            break;
+        case "9":
+            BestFirstSearchSolver.Solve(board, Heuristica.Distance, "Best First Search - Distance");
+            break;
+        case "10":
+            BestFirstSearchSolver.Solve(board, Heuristica.Connectivity, "Best First Search - Connectivity");
+            break;
+        case "11":
+            BestFirstSearchSolver.Solve(board, Heuristica.Centrality, "Best First Search - Centrality");
+            break;
+        case "12":
+            BestFirstSearchSolver.Solve(board, Heuristica.CentralityWhitPenality, "Best First Search - CentralityWhitPenality");
+            break;
+        case "13":
+            AStarSolver.Solve(board, Heuristica.CountPegs, "A* - CountPegs");
+            break;
+        case "14":
+            AStarSolver.Solve(board, Heuristica.Distance, "A* - Distance");
+            break;
+        case "15":
+            AStarSolver.Solve(board, Heuristica.Connectivity, "A* - Connectivity");
+            break;
+        case "16":
+            AStarSolver.Solve(board, Heuristica.Centrality, "A* - Centrality");
+            break;
+        case "17":
+            AStarSolver.Solve(board, Heuristica.CentralityWhitPenality, "A* - CentralityWhitPenality");
+            break;
+
+
+        case "98":
             Console.Clear();
             break;
 
-        case "9":
+        case "99":
             executando = false;
             Console.WriteLine("Encerrando o aplicativo...");
             break;

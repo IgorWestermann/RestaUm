@@ -56,4 +56,33 @@ public class Game
             Console.WriteLine();
         }
     }
+    public static bool IsGoalState(int[,] board)
+    {
+        return CountPegs(board) == 1;
+    }
+
+    public static bool IsValidMove(int[,] state, int i, int j, int x, int y, int x2, int y2)
+    {
+        int rows = state.GetLength(0);
+        int cols = state.GetLength(1);
+
+        if (x2 < 0 || x2 >= rows || y2 < 0 || y2 >= cols)
+            return false;
+
+        return state[i, j] == 1 && state[x, y] == 1 && state[x2, y2] == 0; ;
+    }
+    public static int CountPegs(int[,] board)
+    {
+        int count = 0;
+        for (int i = 0; i < board.GetLength(0); i++)
+            for (int j = 0; j < board.GetLength(1); j++)
+                if (board[i, j] == 1)
+                    count++;
+        return count;
+    }
+
+    public static string StateToString(int[,] state)
+    {
+        return string.Join(",", state.Cast<int>());
+    }
 }
