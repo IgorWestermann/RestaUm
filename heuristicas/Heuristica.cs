@@ -58,7 +58,7 @@ public class Heuristica
         int distance = 0;
         int pegCount = CountPegs(board);
 
-        // Se houver apenas um pino, retorne a distância dele até o centro
+        // Se houver apenas um pino, retorne a distï¿½ncia dele atï¿½ o centro
         if (pegCount == 1) {
             for (int i = 0; i < 7; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -68,7 +68,7 @@ public class Heuristica
             }
         }
 
-        // Para múltiplos pinos, podemos usar a soma das distâncias
+        // Para mï¿½ltiplos pinos, podemos usar a soma das distï¿½ncias
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
                 if (board[i, j] == 1)
@@ -82,9 +82,9 @@ public class Heuristica
         int centerX = 3, centerY = 3;
         int totalPenalty = 0;
 
-        // Percorre o tabuleiro e soma a penalização de cada peça.
-        // A penalização de cada peça é o quadrado da distância até o centro.
-        // Assim, peças mais periféricas terão um custo exponencialmente maior.
+        // Percorre o tabuleiro e soma a penalizaï¿½ï¿½o de cada peï¿½a.
+        // A penalizaï¿½ï¿½o de cada peï¿½a ï¿½ o quadrado da distï¿½ncia atï¿½ o centro.
+        // Assim, peï¿½as mais perifï¿½ricas terï¿½o um custo exponencialmente maior.
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
                 if (board[i, j] == 1) {
@@ -95,9 +95,6 @@ public class Heuristica
         }
         return totalPenalty;
     }
-
-
-
 }
 
 

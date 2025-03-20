@@ -14,37 +14,42 @@ namespace RestaUm
         /// <summary>
         /// Default heuristic function for A* algorithm
         /// </summary>
-        public static Func<int[,], int> DefaultAStarHeuristic = Heuristica.CountPegs;
+        public static Func<int[,], int> DefaultAStarHeuristic { get; set; } = Heuristica.CountPegs;
 
         /// <summary>
         /// Default heuristic function for Best First Search algorithm
         /// </summary>
-        public static Func<int[,], int> DefaultGreedyHeuristic = Heuristica.CountPegs;
+        public static Func<int[,], int> DefaultGreedyHeuristic { get; set; } = Heuristica.CountPegs;
 
         /// <summary>
         /// Default heuristic function for Weighted A* algorithm
         /// </summary>
-        public static Func<int[,], int> DefaultWeightedAStarHeuristic = Heuristica.Centrality;
+        public static Func<int[,], int> DefaultWeightedAStarHeuristic { get; set; } = Heuristica.Centrality;
 
         /// <summary>
         /// Default primary heuristic function for Ordered Search
         /// </summary>
-        public static Func<int[,], int> DefaultPrimaryHeuristic = Heuristica.Centrality;
+        public static Func<int[,], int> DefaultPrimaryHeuristic { get; set; } = Heuristica.Centrality;
 
         /// <summary>
         /// Default secondary heuristic function for Ordered Search
         /// </summary>
-        public static Func<int[,], int> DefaultSecondaryHeuristic = Helpers.Helpers.FutureMobility;
+        public static Func<int[,], int> DefaultSecondaryHeuristic { get; set; } = Helpers.Helpers.FutureMobility;
 
         /// <summary>
         /// Default weight for Weighted A* algorithm
         /// </summary>
-        public static double DefaultWeight = 1.0;
+        public static double DefaultWeight { get; private set; } = 1.5;
 
         /// <summary>
         /// Default path cost increment for each move
         /// </summary>
-        public static int DefaultMoveCost = 1;
+        public static int DefaultMoveCost { get; private set; } = 1;
+
+        /// <summary>
+        /// Number of times to run each algorithm for benchmarking
+        /// </summary>
+        public static int AlgorithmIterations { get; private set; } = 1;
 
         #endregion
 
@@ -53,22 +58,22 @@ namespace RestaUm
         /// <summary>
         /// Iteration interval for showing progress updates
         /// </summary>
-        public static int ProgressUpdateInterval = 500;
+        public static int ProgressUpdateInterval { get; private set; } = 1000;
 
         /// <summary>
         /// Maximum iterations before timing out (0 means no limit)
         /// </summary>
-        public static int MaxIterations = 0;
+        public static int MaxIterations { get; private set; } = -1;
 
         /// <summary>
         /// Maximum time in milliseconds before timing out (0 means no limit)
         /// </summary>
-        public static int TimeoutMs = 0;
+        public static int TimeoutMs { get; private set; } = -1;
 
         /// <summary>
         /// Whether to check for hash values to detect symmetric board positions
         /// </summary>
-        public static bool CheckHashValues = true;
+        public static bool CheckHashValues { get; private set; } = true;
 
         #endregion
 
@@ -107,6 +112,18 @@ namespace RestaUm
             { -1, -1,  1,  1,  1, -1, -1 }
         };
 
+        /// <summary>
+        /// Board size (default is 7x7)
+        /// </summary>
+        public static int BoardSize { get; set; } = 7;
+        public static string OutputPath { get; internal set; } = Directory.GetCurrentDirectory() + "/reports/";
+
         #endregion
+
+
+        public static void UseHashVerification(bool b)
+        {
+            Config.CheckHashValues = b;
+        }
     }
 }

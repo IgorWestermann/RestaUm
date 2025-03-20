@@ -1,6 +1,8 @@
 namespace RestaUm.Helpers
 {
     using RestaUm.Game;
+    using RestaUm.States;
+
     public class Helpers
     {
         public static string BoardToString(int[,] board)
@@ -27,6 +29,8 @@ namespace RestaUm.Helpers
 
         public static void PrintSolution(Node node)
         {
+            if (!Config.VerboseLogging) return;
+
             var path = new List<Node>();
             while (node != null)
             {
@@ -47,6 +51,9 @@ namespace RestaUm.Helpers
 
         public static void PrintSolution(GameState node)
         {
+
+            if (!Config.VerboseLogging) return;
+
             var path = new List<GameState>();
             while (node != null)
             {
