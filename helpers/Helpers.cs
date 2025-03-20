@@ -1,86 +1,103 @@
-using RestaUm.helpers;
+namespace RestaUm.Helpers
+{
+    using RestaUm.Game;
+    public class Helpers
+    {
+        public static string BoardToString(int[,] board)
+        {
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < 7; i++)
+                for (int j = 0; j < 7; j++)
+                    sb.Append(board[i, j]);
+            return sb.ToString();
+        }
 
-namespace RestaUm.Helpers;
-
-public class Helpers {
-    public static string BoardToString(int[,] board) {
-        var sb = new System.Text.StringBuilder();
-        for (int i = 0; i < 7; i++)
-            for (int j = 0; j < 7; j++)
-                sb.Append(board[i, j]);
-        return sb.ToString();
-    }
-
-    public static void PrintBoard(int[,] board) {
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 7; j++) {
-                Console.Write(board[i, j] == -1 ? " " : board[i, j].ToString());
-                Console.Write(" ");
+        public static void PrintBoard(int[,] board)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                for (int j = 0; j < 7; j++)
+                {
+                    Console.Write(board[i, j] == -1 ? " " : board[i, j].ToString());
+                    Console.Write(" ");
+                }
+                Console.WriteLine();
             }
-            Console.WriteLine();
-        }
-    }
-
-    public static void PrintSolution(Node node) {
-        var path = new List<Node>();
-        while (node != null) {
-            path.Add(node);
-            node = node.Parent;
         }
 
-        path.Reverse();
+        public static void PrintSolution(Node node)
+        {
+            var path = new List<Node>();
+            while (node != null)
+            {
+                path.Add(node);
+                node = node.Parent;
+            }
 
-        Console.WriteLine("Solution Path:");
-        foreach (var n in path) {
-            Console.WriteLine($"Move: {n.Action}");
-            PrintBoard(n.State);
-            Console.WriteLine();
+            path.Reverse();
+
+            Console.WriteLine("Solution Path:");
+            foreach (var n in path)
+            {
+                Console.WriteLine($"Move: {n.Action}");
+                PrintBoard(n.State);
+                Console.WriteLine();
+            }
         }
-    }
 
-    // Método para exportar a árvore de busca para um arquivo DOT
-    public static void ExportSearchTreeToDOT(Node root, string filePath) {
-        using (StreamWriter writer = new StreamWriter(filePath)) {
-            writer.WriteLine("digraph SearchTree {");
-            writer.WriteLine("    node [shape=box, style=filled, color=lightblue];");
+        // Mï¿½todo para exportar a ï¿½rvore de busca para um arquivo DOT
+        public static void ExportSearchTreeToDOT(Node root, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine("digraph SearchTree {");
+                writer.WriteLine("    node [shape=box, style=filled, color=lightblue];");
 
-            int idCounter = 0;
-            ExportNodeDOT(root, writer, ref idCounter);
+                int idCounter = 0;
+                ExportNodeDOT(root, writer, ref idCounter);
 
-            writer.WriteLine("}");
+                writer.WriteLine("}");
+            }
+            Console.WriteLine($"Arquivo DOT criado em: {filePath}");
         }
-        Console.WriteLine($"Arquivo DOT criado em: {filePath}");
-    }
 
-    // Método auxiliar recursivo para escrever cada nó e as arestas correspondentes
-    private static int ExportNodeDOT(Node node, StreamWriter writer, ref int idCounter) {
-        int currentId = idCounter;
-        idCounter++;
+        // Mï¿½todo auxiliar recursivo para escrever cada nï¿½ e as arestas correspondentes
+        private static int ExportNodeDOT(Node node, StreamWriter writer, ref int idCounter)
+        {
+            int currentId = idCounter;
+            idCounter++;
 
-        // Cria o rótulo do nó com informações importantes (você pode personalizar)
-        string label = $"Move: {node.Action} | Cost: {node.PathCost} | Heur: {node.HeuristicValue}";
-        writer.WriteLine($"    Node{currentId} [label=\"{label}\"];");
+            // Cria o rï¿½tulo do nï¿½ com informaï¿½ï¿½es importantes (vocï¿½ pode personalizar)
+            string label = $"Move: {node.Action} | Cost: {node.PathCost} | Heur: {node.HeuristicValue}";
+            writer.WriteLine($"    Node{currentId} [label=\"{label}\"];");
 
-        // Para cada filho do nó atual, escreve a aresta e chama recursivamente
-        foreach (var child in node.Children) {
-            int childId = ExportNodeDOT(child, writer, ref idCounter);
-            writer.WriteLine($"    Node{currentId} -> Node{childId};");
+            // Para cada filho do nï¿½ atual, escreve a aresta e chama recursivamente
+            foreach (var child in node.Children)
+            {
+                int childId = ExportNodeDOT(child, writer, ref idCounter);
+                writer.WriteLine($"    Node{currentId} -> Node{childId};");
+            }
+            return currentId;
         }
-        return currentId;
-    }
 
-    //Metodo que retorna a quantidade de movimentos possiveis do tabuleiro
-    public static int FutureMobility(int[,] board) {
-        int mobility = 0;
-        for (int x = 0; x < 7; x++) {
-            for (int y = 0; y < 7; y++) {
-                foreach (var (dx, dy) in Game.directions) {
-                    if (Game.IsValidMove(board, x, y, dx, dy))
-                        mobility++;
+        //Metodo que retorna a quantidade de movimentos possiveis do tabuleiro
+        public static int FutureMobility(int[,] board)
+        {
+            int mobility = 0;
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(board, x, y, dx, dy))
+                            mobility++;
+                    }
                 }
             }
+            return mobility;
         }
-        return mobility;
-    }
 
-}
+    }
+};
+

@@ -1,18 +1,18 @@
 using RestaUm;
-using RestaUm.helpers;
+using RestaUm.Game;
 using RestaUm.Helpers;
 using System;
 using System.Collections.Generic;
 
 public class Algorithm
 {
-    public static bool AStar(int[,] initialBoard, int initialPegCount)
+    public static bool AStar(int[,] initialBoard, int initialPegCount, bool checkForHashValues = false)
     {
         var queue = new PriorityQueue<State, int>();
-
         var visited = new HashSet<string>();
+        var visitedHash = new HashSet<string>();
 
-        var initialState = new State(initialBoard, initialPegCount, 0);
+        var initialState = new State(initialBoard, initialPegCount, 0, Game.GenerateBoardHashes(initialBoard));
         queue.Enqueue(initialState, initialState.HeuristicValue);
 
         int iteration = 0;
@@ -32,13 +32,16 @@ public class Algorithm
             }
 
             string boardKey = Helpers.BoardToString(currentState.Board);
+            string boardHash = Game.GenerateBoardHashes(currentState.Board);
 
             if (visited.Contains(boardKey))
-            {
                 continue;
-            }
-
             visited.Add(boardKey);
+
+            if (checkForHashValues && visitedHash.Contains(boardHash))
+                continue;
+
+            visitedHash.Add(boardHash);
 
             for (int x = 0; x < 7; x++)
             {
@@ -52,30 +55,32 @@ public class Algorithm
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
                             int newPegCount = currentState.PegCount - 1;
+                            string newBoardHash = Game.GenerateBoardHashes(newBoard);
 
-                            var newState = new State(newBoard, newPegCount, currentState.MovesSoFar + 1);
-
-                            //Deveria ser currentState.MovesSoFar + newState.HeuristicValue, tentei mudar mas estourava o tempo do algoritmo
+                            var newState = new State(newBoard, newPegCount, currentState.MovesSoFar + 1, newBoardHash);
                             queue.Enqueue(newState, newState.HeuristicValue);
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
+
         }
 
         Console.WriteLine("No solution found.");
         return false;
     }
 
-    // Implementação do Algoritimo Guloso, com a Heuristic de contar pecas
-    public static bool BestFirstSearch(int[,] initialBoard)
+    // Implementaï¿½ï¿½o do Algoritimo Guloso, com a Heuristic de contar pecas
+    public static bool BestFirstSearch(int[,] initialBoard, bool checkForHashValues = false)
     {
         var frontier = new PriorityQueue<Node, int>();
-
         var explored = new HashSet<string>();
+        var exploredHash = new HashSet<string>();
 
         var initialState = new Node(initialBoard, null, (0, 0, 0, 0), 0, Heuristica.CountPegs(initialBoard));
-
         int iteration = 0;
 
         frontier.Enqueue(initialState, initialState.HeuristicValue);
@@ -83,7 +88,6 @@ public class Algorithm
         while (frontier.Count > 0)
         {
             iteration++;
-
             var currentNode = frontier.Dequeue();
 
             if (Heuristica.CountPegs(currentNode.State!) == 1)
@@ -95,10 +99,16 @@ public class Algorithm
             }
 
             string boardKey = Helpers.BoardToString(currentNode.State);
+            string boardHash = Game.GenerateBoardHashes(currentNode.State);
+
             if (explored.Contains(boardKey))
                 continue;
 
+            if (checkForHashValues && exploredHash.Contains(boardHash))
+                continue;
+
             explored.Add(boardKey);
+            exploredHash.Add(boardHash);
 
             for (int x = 0; x < 7; x++)
             {
@@ -112,48 +122,52 @@ public class Algorithm
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
                             int newPathCost = currentNode.PathCost + 2;
-
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, Heuristica.CountPegs(newBoard));
-
                             frontier.Enqueue(newNode, newNode.HeuristicValue);
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found.");
         return false;
     }
 
-    // Implementação da Busca Ordenada 
-    // Implementação da Busca Ordenada usando a heurística de centralidade com critério de desempate baseado em mobilidade futura
-    public static bool OrderedSearch(int[,] initialBoard, out Node rootNode) {
-        // Calcula a heurística primária: centralidade (soma das distâncias Manhattan dos pinos até o centro)
+    // Implementaï¿½ï¿½o da Busca Ordenada 
+    // Implementaï¿½ï¿½o da Busca Ordenada usando a heurï¿½stica de centralidade com critï¿½rio de desempate baseado em mobilidade futura
+    public static bool OrderedSearch(int[,] initialBoard, out Node rootNode)
+    {
+        // Calcula a heurï¿½stica primï¿½ria: centralidade (soma das distï¿½ncias Manhattan dos pinos atï¿½ o centro)
         int initialCentrality = Heuristica.Centrality(initialBoard);
-        // Cria o nó raiz com custo 0 e heurística definida pela centralidade
+        // Cria o nï¿½ raiz com custo 0 e heurï¿½stica definida pela centralidade
         rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, initialCentrality);
 
         // Calcula a mobilidade futura para o estado inicial
         int initialFutureMobility = Helpers.FutureMobility(initialBoard);
 
         // A fila de prioridade utiliza uma tupla: (centralidade, mobilidade futura, custo do caminho)
-        // Critério de desempate:
-        //   - Primeiro: centralidade (menor é melhor)
-        //   - Segundo: mobilidade futura (menor indica menos movimentos disponíveis e pode sinalizar convergência)
-        //   - Terceiro: custo do caminho (menor é melhor)
+        // Critï¿½rio de desempate:
+        //   - Primeiro: centralidade (menor ï¿½ melhor)
+        //   - Segundo: mobilidade futura (menor indica menos movimentos disponï¿½veis e pode sinalizar convergï¿½ncia)
+        //   - Terceiro: custo do caminho (menor ï¿½ melhor)
         var frontier = new PriorityQueue<Node, (int, int, int)>();
         var explored = new HashSet<string>();
 
         frontier.Enqueue(rootNode, (initialCentrality, initialFutureMobility, rootNode.PathCost));
         int iteration = 0;
 
-        while (frontier.Count > 0) {
+        while (frontier.Count > 0)
+        {
             iteration++;
             var currentNode = frontier.Dequeue();
 
-            // Se restar apenas 1 pino, a solução foi encontrada
-            if (Heuristica.CountPegs(currentNode.State) == 1) {
+            // Se restar apenas 1 pino, a soluï¿½ï¿½o foi encontrada
+            if (Heuristica.CountPegs(currentNode.State) == 1)
+            {
                 Console.WriteLine("Solution found with Ordered Search using Centrality and Future Mobility tie-breaker!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
@@ -165,30 +179,37 @@ public class Algorithm
                 continue;
             explored.Add(boardKey);
 
-            // Expande os movimentos válidos a partir do estado atual
-            for (int x = 0; x < 7; x++) {
-                for (int y = 0; y < 7; y++) {
-                    foreach (var (dx, dy) in Game.directions) {
-                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy)) {
+            // Expande os movimentos vï¿½lidos a partir do estado atual
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy))
+                        {
                             var newBoard = (int[,])currentNode.State.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
                             int newPathCost = currentNode.PathCost + 2;
-                            // Nova heurística baseada na centralidade
+                            // Nova heurï¿½stica baseada na centralidade
                             int newCentrality = Heuristica.Centrality(newBoard);
                             // Calcula a mobilidade futura para o novo estado
                             int newFutureMobility = Helpers.FutureMobility(newBoard);
 
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newCentrality);
-                            // Adiciona o novo nó como filho do nó atual (para construir a árvore de busca)
+                            // Adiciona o novo nï¿½ como filho do nï¿½ atual (para construir a ï¿½rvore de busca)
                             currentNode.Children.Add(newNode);
 
-                            // Enfileira o novo nó: (centralidade, mobilidade futura, custo)
+                            // Enfileira o novo nï¿½: (centralidade, mobilidade futura, custo)
                             frontier.Enqueue(newNode, (newCentrality, newFutureMobility, newNode.PathCost));
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found with Ordered Search using Centrality and Future Mobility tie-breaker.");
@@ -197,56 +218,66 @@ public class Algorithm
 
 
 
-    // Implementação da Busca A* com heurística de centralidade
-    public static bool AStarCentrality(int[,] initialBoard, out Node rootNode) {
-        // Estado inicial: custo 0 e heurística de centralidade
+    // Implementaï¿½ï¿½o da Busca A* com heurï¿½stica de centralidade
+    public static bool AStarCentrality(int[,] initialBoard, out Node rootNode)
+    {
+        // Estado inicial: custo 0 e heurï¿½stica de centralidade
         rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, Heuristica.Distance(initialBoard));
 
         // Fila de prioridade com prioridade definida por f(n) = g(n) + h(n)
         var frontier = new PriorityQueue<Node, int>();
         var explored = new HashSet<string>();
 
-        // Enfileira o nó raiz com f(n)=PathCost + HeuristicValue
+        // Enfileira o nï¿½ raiz com f(n)=PathCost + HeuristicValue
         frontier.Enqueue(rootNode, rootNode.PathCost + rootNode.HeuristicValue);
 
         int iteration = 0;
-        while (frontier.Count > 0) {
+        while (frontier.Count > 0)
+        {
             iteration++;
             var currentNode = frontier.Dequeue();
 
-            // Se encontrar a solução (apenas 1 pino restante), imprime o caminho e retorna true
-            if (Heuristica.CountPegs(currentNode.State) == 1) {
+            // Se encontrar a soluï¿½ï¿½o (apenas 1 pino restante), imprime o caminho e retorna true
+            if (Heuristica.CountPegs(currentNode.State) == 1)
+            {
                 Console.WriteLine("Solution found with A* (Centrality Heuristic)!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
                 return true;
             }
 
-            // Evita revisitar estados já explorados
+            // Evita revisitar estados jï¿½ explorados
             string boardKey = Helpers.BoardToString(currentNode.State);
             if (explored.Contains(boardKey))
                 continue;
             explored.Add(boardKey);
 
-            // Expande os movimentos válidos a partir do estado atual
-            for (int x = 0; x < 7; x++) {
-                for (int y = 0; y < 7; y++) {
-                    foreach (var (dx, dy) in Game.directions) {
-                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy)) {
+            // Expande os movimentos vï¿½lidos a partir do estado atual
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy))
+                        {
                             var newBoard = (int[,])currentNode.State.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
                             int newPathCost = currentNode.PathCost + 1; // custo definido para o movimento
-                                                                        // Heurística de centralidade: soma das distâncias dos pinos ao centro
+                                                                        // Heurï¿½stica de centralidade: soma das distï¿½ncias dos pinos ao centro
                             int newHeuristic = Heuristica.Distance(newBoard);
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newHeuristic);
 
-                            // Enfileira o novo nó usando f(n) = g(n) + h(n)
+                            // Enfileira o novo nï¿½ usando f(n) = g(n) + h(n)
                             frontier.Enqueue(newNode, newNode.PathCost + newNode.HeuristicValue);
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found with A* (Centrality Heuristic).");
@@ -254,25 +285,28 @@ public class Algorithm
     }
 
 
-    // Implementação do Algoritimos Guloso com heurística de centralidade
-    public static bool GreedySearch(int[,] initialBoard) {
-        // A heurística é sempre definida como a centralidade:
+    // Implementaï¿½ï¿½o do Algoritimos Guloso com heurï¿½stica de centralidade
+    public static bool GreedySearch(int[,] initialBoard)
+    {
+        // A heurï¿½stica ï¿½ sempre definida como a centralidade:
         int initialHeuristic = Heuristica.Distance(initialBoard);
         var initialNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, initialHeuristic);
 
-        // Fila de prioridade onde a prioridade é dada apenas pela heurística (h(n)).
+        // Fila de prioridade onde a prioridade ï¿½ dada apenas pela heurï¿½stica (h(n)).
         var frontier = new PriorityQueue<Node, int>();
         var explored = new HashSet<string>();
 
         frontier.Enqueue(initialNode, initialNode.HeuristicValue);
 
         int iteration = 0;
-        while (frontier.Count > 0) {
+        while (frontier.Count > 0)
+        {
             iteration++;
             var currentNode = frontier.Dequeue();
 
-            // Se o estado objetivo for atingido (apenas 1 pino restante), imprime a solução.
-            if (Heuristica.CountPegs(currentNode.State) == 1) {
+            // Se o estado objetivo for atingido (apenas 1 pino restante), imprime a soluï¿½ï¿½o.
+            if (Heuristica.CountPegs(currentNode.State) == 1)
+            {
                 Console.WriteLine("Solution found with Greedy Search (Centrality Heuristic)!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
@@ -284,56 +318,66 @@ public class Algorithm
                 continue;
             explored.Add(boardKey);
 
-            // Expande todos os movimentos válidos a partir do estado atual.
-            for (int x = 0; x < 7; x++) {
-                for (int y = 0; y < 7; y++) {
-                    foreach (var (dx, dy) in Game.directions) {
-                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy)) {
+            // Expande todos os movimentos vï¿½lidos a partir do estado atual.
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy))
+                        {
                             var newBoard = (int[,])currentNode.State.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
-                            // Calcula a heurística para o novo estado.
+                            // Calcula a heurï¿½stica para o novo estado.
                             int newHeuristic = Heuristica.Distance(newBoard);
-                            int newPathCost = currentNode.PathCost + 2; // custo apenas para registro (não afeta a seleção)
+                            int newPathCost = currentNode.PathCost + 2; // custo apenas para registro (nï¿½o afeta a seleï¿½ï¿½o)
 
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newHeuristic);
 
-                            // Enfileira o novo nó usando apenas o valor da heurística.
+                            // Enfileira o novo nï¿½ usando apenas o valor da heurï¿½stica.
                             frontier.Enqueue(newNode, newNode.HeuristicValue);
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found with Greedy Search (Centrality Heuristic).");
         return false;
     }
 
-    // Implementação do A* com Heurística de Centralidade Ponderada.
+    // Implementaï¿½ï¿½o do A* com Heurï¿½stica de Centralidade Ponderada.
     // f(n) = g(n) + weight * h(n), onde:
-    //   - g(n) é o custo acumulado (PathCost)
-    //   - h(n) é a heurística, definida aqui como a centralidade (soma das distâncias Manhattan dos pinos até o centro)
-    public static bool AStarWeightedCentrality(int[,] initialBoard, double weight) {
-        // Calcula a heurística inicial (centralidade) para o tabuleiro
+    //   - g(n) ï¿½ o custo acumulado (PathCost)
+    //   - h(n) ï¿½ a heurï¿½stica, definida aqui como a centralidade (soma das distï¿½ncias Manhattan dos pinos atï¿½ o centro)
+    public static bool AStarWeightedCentrality(int[,] initialBoard, double weight)
+    {
+        // Calcula a heurï¿½stica inicial (centralidade) para o tabuleiro
         int initialCentrality = Heuristica.Centrality(initialBoard);
-        // Cria o nó raiz com custo 0 e heurística definida como a centralidade
+        // Cria o nï¿½ raiz com custo 0 e heurï¿½stica definida como a centralidade
         var rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, initialCentrality);
 
-        // Fila de prioridade utilizando double para acomodar a multiplicação do peso na heurística
+        // Fila de prioridade utilizando double para acomodar a multiplicaï¿½ï¿½o do peso na heurï¿½stica
         var frontier = new PriorityQueue<Node, double>();
         var explored = new HashSet<string>();
 
-        // A prioridade é f(n) = g(n) + weight * h(n)
+        // A prioridade ï¿½ f(n) = g(n) + weight * h(n)
         frontier.Enqueue(rootNode, rootNode.PathCost + weight * rootNode.HeuristicValue);
 
         int iteration = 0;
-        while (frontier.Count > 0) {
+        while (frontier.Count > 0)
+        {
             iteration++;
             var currentNode = frontier.Dequeue();
 
-            // Verifica se a solução foi encontrada: apenas 1 pino restante
-            if (Heuristica.CountPegs(currentNode.State) == 1) {
+            // Verifica se a soluï¿½ï¿½o foi encontrada: apenas 1 pino restante
+            if (Heuristica.CountPegs(currentNode.State) == 1)
+            {
                 Console.WriteLine("Solution found with AStarWeightedCentrality!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
@@ -345,11 +389,15 @@ public class Algorithm
                 continue;
             explored.Add(boardKey);
 
-            // Expande os movimentos válidos a partir do estado atual
-            for (int x = 0; x < 7; x++) {
-                for (int y = 0; y < 7; y++) {
-                    foreach (var (dx, dy) in Game.directions) {
-                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy)) {
+            // Expande os movimentos vï¿½lidos a partir do estado atual
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy))
+                        {
                             var newBoard = (int[,])currentNode.State.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
@@ -357,12 +405,15 @@ public class Algorithm
                             int newCentrality = Heuristica.Centrality(newBoard);
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newCentrality);
 
-                            // Enfileira o novo nó usando a fórmula: f(n) = g(n) + weight * h(n)
+                            // Enfileira o novo nï¿½ usando a fï¿½rmula: f(n) = g(n) + weight * h(n)
                             frontier.Enqueue(newNode, newNode.PathCost + weight * newNode.HeuristicValue);
                         }
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found with AStarWeightedCentrality.");
@@ -378,7 +429,7 @@ public class Algorithm
         // Pilha para armazenar os estados a serem explorados (DFS)
         var stack = new Stack<State>();
 
-        // Conjunto para armazenar estados já visitados e evitar repetições
+        // Conjunto para armazenar estados jï¿½ visitados e evitar repetiï¿½ï¿½es
         var visited = new HashSet<string>();
 
         // Estado inicial: tabuleiro, quantidade inicial de pinos e custo zero
@@ -392,7 +443,7 @@ public class Algorithm
             iteration++;
             var currentState = stack.Pop();
 
-            // Verifica se a solução foi encontrada (apenas 1 pino restante)
+            // Verifica se a soluï¿½ï¿½o foi encontrada (apenas 1 pino restante)
             if (currentState.PegCount == 1)
             {
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
@@ -401,13 +452,13 @@ public class Algorithm
                 return true;
             }
 
-            // Gera uma chave única para o estado atual
+            // Gera uma chave ï¿½nica para o estado atual
             string boardKey = Helpers.BoardToString(currentState.Board);
             if (visited.Contains(boardKey))
                 continue;
             visited.Add(boardKey);
 
-            // Expande os movimentos válidos a partir do estado atual
+            // Expande os movimentos vï¿½lidos a partir do estado atual
             for (int x = 0; x < 7; x++)
             {
                 for (int y = 0; y < 7; y++)
@@ -428,19 +479,22 @@ public class Algorithm
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found.");
         return false;
     }
 
-    //Busca em Largura sem otimização
+    //Busca em Largura sem otimizaï¿½ï¿½o
 
     public static bool BreadthFirstSearch(int[,] initialBoard, int initialPegCount)
     {
         // Fila FIFO para armazenar os estados a serem explorados
         var queue = new Queue<State>();
-        // Conjunto para armazenar estados já visitados (usamos a representação em string do tabuleiro)
+        // Conjunto para armazenar estados jï¿½ visitados (usamos a representaï¿½ï¿½o em string do tabuleiro)
         var visited = new HashSet<string>();
 
         // Cria o estado inicial e adiciona-o imediatamente ao conjunto de visitados
@@ -456,7 +510,7 @@ public class Algorithm
             iteration++;
             var currentState = queue.Dequeue();
 
-            // Verifica se a solução foi encontrada: apenas 1 pino restante
+            // Verifica se a soluï¿½ï¿½o foi encontrada: apenas 1 pino restante
             if (currentState.PegCount == 1)
             {
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
@@ -465,12 +519,12 @@ public class Algorithm
                 return true;
             }
 
-            // Para cada posição do tabuleiro
+            // Para cada posiï¿½ï¿½o do tabuleiro
             for (int x = 0; x < 7; x++)
             {
                 for (int y = 0; y < 7; y++)
                 {
-                    // Para cada direção possível
+                    // Para cada direï¿½ï¿½o possï¿½vel
                     foreach (var (dx, dy) in Game.directions)
                     {
                         if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
@@ -482,7 +536,7 @@ public class Algorithm
 
                             // Gera a chave do novo estado
                             string boardKey = Helpers.BoardToString(newBoard);
-                            // Só enfileira se o estado não foi visitado ainda
+                            // Sï¿½ enfileira se o estado nï¿½o foi visitado ainda
                             if (!visited.Contains(boardKey))
                             {
                                 visited.Add(boardKey);
@@ -493,6 +547,9 @@ public class Algorithm
                     }
                 }
             }
+
+            if (iteration % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 10) % 4] + $" Iterations: {iteration}");
         }
 
         Console.WriteLine("No solution found.");
@@ -500,16 +557,16 @@ public class Algorithm
     }
 
 
-    // Implementação da Busca Backtracking
+    // Implementaï¿½ï¿½o da Busca Backtracking
 
     public static int iterationCount = 0;
 
     private static bool BacktrackingSearch(int[,] board, int pegCount, HashSet<string> visited)
     {
-        // Incrementa o contador de iterações a cada chamada recursiva
+        // Incrementa o contador de iteraï¿½ï¿½es a cada chamada recursiva
         iterationCount++;
 
-        // Condição de sucesso: apenas 1 pino restante
+        // Condiï¿½ï¿½o de sucesso: apenas 1 pino restante
         if (pegCount == 1)
         {
             Console.WriteLine("Solution found!");
@@ -518,13 +575,13 @@ public class Algorithm
             return true;
         }
 
-        // Evita reexplorar estados já visitados
+        // Evita reexplorar estados jï¿½ visitados
         string boardKey = Helpers.BoardToString(board);
         if (visited.Contains(boardKey))
             return false;
         visited.Add(boardKey);
 
-        // Tenta cada movimento válido no tabuleiro
+        // Tenta cada movimento vï¿½lido no tabuleiro
         for (int x = 0; x < 7; x++)
         {
             for (int y = 0; y < 7; y++)
@@ -541,15 +598,18 @@ public class Algorithm
                     }
                 }
             }
+
+            if (iterationCount % 10 == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iterationCount / 10) % 4] + $" Iterations: {iterationCount}");
         }
 
         return false;
     }
 
-    // Função wrapper para iniciar a busca com backtracking
+    // Funï¿½ï¿½o wrapper para iniciar a busca com backtracking
     public static bool SolveBacktracking(int[,] initialBoard, int initialPegCount)
     {
-        iterationCount = 0; // Reseta o contador de iterações
+        iterationCount = 0; // Reseta o contador de iteraï¿½ï¿½es
         var visited = new HashSet<string>();
         bool result = BacktrackingSearch(initialBoard, initialPegCount, visited);
 
@@ -560,7 +620,7 @@ public class Algorithm
     }
 }
 
-// Busca em largura com bitMask e pré-computação dos movimentos, pra tentar ser mais otimizado
+// Busca em largura com bitMask e prï¿½-computaï¿½ï¿½o dos movimentos, pra tentar ser mais otimizado
 public struct Move
 {
     public int from;
@@ -590,15 +650,15 @@ public struct StateBitmask
 
 public static class PegSolitaireOptimized
 {
-    // Lista de todos os movimentos possíveis pré-computados
+    // Lista de todos os movimentos possï¿½veis prï¿½-computados
     public static List<Move> PrecomputedMoves = GenerateMoves();
 
-    // Gera a lista de movimentos válidos para um tabuleiro 7x7
+    // Gera a lista de movimentos vï¿½lidos para um tabuleiro 7x7
     public static List<Move> GenerateMoves()
     {
         var moves = new List<Move>();
         int rows = 7, cols = 7;
-        // Direções: cima, baixo, esquerda, direita
+        // Direï¿½ï¿½es: cima, baixo, esquerda, direita
         int[,] directions = new int[,] { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 
         for (int i = 0; i < rows; i++)
@@ -644,7 +704,7 @@ public static class PegSolitaireOptimized
         return bitmask;
     }
 
-    // Algoritmo BFS otimizado utilizando bitmask e movimentos pré-computados
+    // Algoritmo BFS otimizado utilizando bitmask e movimentos prï¿½-computados
     public static bool OptimizedBFSBitmask(int[,] initialBoard, int initialPegCount)
     {
         Queue<StateBitmask> queue = new Queue<StateBitmask>();
@@ -667,20 +727,20 @@ public static class PegSolitaireOptimized
                 return true;
             }
 
-            // Testa cada movimento pré-computado
+            // Testa cada movimento prï¿½-computado
             foreach (var move in PrecomputedMoves)
             {
-                // Verifica se o movimento é válido:
-                // Deve existir pino na posição 'from' e 'mid', e a posição 'to' deve estar vazia.
+                // Verifica se o movimento ï¿½ vï¿½lido:
+                // Deve existir pino na posiï¿½ï¿½o 'from' e 'mid', e a posiï¿½ï¿½o 'to' deve estar vazia.
                 if (((currentState.Bitmask >> move.from) & 1L) == 1 &&
                     ((currentState.Bitmask >> move.mid) & 1L) == 1 &&
                     ((currentState.Bitmask >> move.to) & 1L) == 0)
                 {
                     long newMask = currentState.Bitmask;
-                    // Remove o pino da posição 'from' e da posição 'mid'
+                    // Remove o pino da posiï¿½ï¿½o 'from' e da posiï¿½ï¿½o 'mid'
                     newMask &= ~(1L << move.from);
                     newMask &= ~(1L << move.mid);
-                    // Coloca o pino na posição 'to'
+                    // Coloca o pino na posiï¿½ï¿½o 'to'
                     newMask |= (1L << move.to);
 
                     if (!visited.Contains(newMask))
