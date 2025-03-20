@@ -54,7 +54,7 @@ while (executando)
         case "1":
             Algorithm.AStarCentrality(board, out root);
             Console.WriteLine("AStarCentrality executado.");
-            Helpers.ExportSearchTreeToDOT(root, "searchTreeCentrality.dot");
+            //Helpers.ExportSearchTreeToDOT(root, "searchTreeCentrality.dot");
             break;
 
         case "2":
@@ -116,19 +116,19 @@ while (executando)
             BestFirstSearchSolver.Solve(board, Heuristica.CentralityWhitPenality, "Best First Search - CentralityWhitPenality", out root);
             break;
         case "13":
-            AStarSolver.Solve(board, Heuristica.CountPegs, "A* - CountPegs");
+            AStarSolver.Solve(board, Heuristica.CountPegs, "A* - CountPegs", out root);
             break;
         case "14":
-            AStarSolver.Solve(board, Heuristica.Distance, "A* - Distance");
+            AStarSolver.Solve(board, Heuristica.Distance, "A* - Distance", out root);
             break;
         case "15":
-            AStarSolver.Solve(board, Heuristica.Connectivity, "A* - Connectivity");
+            AStarSolver.Solve(board, Heuristica.Connectivity, "A* - Connectivity", out root);
             break;
         case "16":
-            AStarSolver.Solve(board, Heuristica.Centrality, "A* - Centrality");
+            AStarSolver.Solve(board, Heuristica.Centrality, "A* - Centrality", out root);
             break;
         case "17":
-            AStarSolver.Solve(board, Heuristica.CentralityWhitPenality, "A* - CentralityWhitPenality");
+            AStarSolver.Solve(board, Heuristica.CentralityWhitPenality, "A* - CentralityWhitPenality", out root);
             break;
 
 

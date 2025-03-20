@@ -17,7 +17,7 @@ namespace RestaUm.algoritimos
             int totalNodes = 0;
             var stopwatch = Stopwatch.StartNew();
 
-            frontier.Enqueue(rootNode, rootNode.HeuristicValue);
+            frontier.Enqueue(rootNode, rootNode.PathCost + rootNode.HeuristicValue);
 
             while (frontier.Count > 0)
             {
@@ -32,6 +32,7 @@ namespace RestaUm.algoritimos
                     Console.WriteLine($"--- Iterations: {iteration} ---");
                     Console.WriteLine($"--- Total Nodes: {totalNodes} ---");
                     Console.WriteLine($"--- Time Elapsed: {stopwatch.ElapsedMilliseconds / 1000.0} s ---");
+                    Console.WriteLine($"Pontos Solução: {Helpers.Helpers.caculePoints(currentNode.State)}");
                     Helpers.Helpers.PrintBoard(currentNode.State);
                     return true;
                 }

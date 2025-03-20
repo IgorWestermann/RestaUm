@@ -4,20 +4,17 @@ namespace RestaUm.algoritimos
 {
     public class AStarSolver
     {
-        private static readonly int[] dx = { -1, 1, 0, 0 };
-        private static readonly int[] dy = { 0, 0, -1, 1 };
-
-        public static Node Solve(int[,] initialBoard, Func<int[,], int> heuristicFunction, string name)
+        public static Node Solve(int[,] initialBoard, Func<int[,], int> heuristicFunction, string name, out Node rootNode)
         {
             int pegCount = Game.CountPegs(initialBoard);
             State initialState = new State(initialBoard, pegCount, 0);
-            Node initialNode = new Node(initialBoard, null, (-1, -1, -1, -1), 0, heuristicFunction(initialBoard));
+            rootNode = new Node(initialBoard, null, (-1, -1, -1, -1), 0, heuristicFunction(initialBoard));
 
 
-            PriorityQueue<Node> openSet = new PriorityQueue<Node>((a, b) => a.HeuristicValue.CompareTo(b.HeuristicValue));
+            PriorityQueue<Node, int> openSet = new PriorityQueue<Node, int>();
             HashSet<string> closedSet = new HashSet<string>();
 
-            openSet.Enqueue(initialNode);
+            openSet.Enqueue(rootNode, rootNode.PathCost + rootNode.HeuristicValue);
 
             int iteration = 0;
             int totalNodes = 0;
@@ -41,6 +38,7 @@ namespace RestaUm.algoritimos
                     Console.WriteLine($"--- Iterations: {iteration} ---");
                     Console.WriteLine($"--- Total Nodes: {totalNodes} ---");
                     Console.WriteLine($"--- Time Elapsed: {stopwatch.ElapsedMilliseconds / 1000.0} s ---");
+                    Console.WriteLine($"Pontos Solução: {Helpers.Helpers.caculePoints(currentNode.State)}");
                     Game.PrintBoard(currentNode.State);
 
                     return currentNode;
@@ -51,7 +49,7 @@ namespace RestaUm.algoritimos
                     totalNodes++;
                     string childStateString = Game.StateToString(child.State);
                     if (!closedSet.Contains(childStateString))
-                        openSet.Enqueue(child);
+                        openSet.Enqueue(child, child.HeuristicValue);
                 }
             }
 
