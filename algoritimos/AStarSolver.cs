@@ -38,7 +38,8 @@ namespace RestaUm.algoritimos
                     Console.WriteLine($"--- Iterations: {iteration} ---");
                     Console.WriteLine($"--- Total Nodes: {totalNodes} ---");
                     Console.WriteLine($"--- Time Elapsed: {stopwatch.ElapsedMilliseconds / 1000.0} s ---");
-                    Console.WriteLine($"Pontos Solução: {Helpers.Helpers.caculePoints(currentNode.State)}");
+                    Console.WriteLine($"Pontos Solução: {Helpers.Helpers.caculePoints(currentNode.State)}\n");
+                    Helpers.Helpers.PrintSolution(currentNode);
                     Game.PrintBoard(currentNode.State);
 
                     return currentNode;
@@ -48,8 +49,11 @@ namespace RestaUm.algoritimos
                 {
                     totalNodes++;
                     string childStateString = Game.StateToString(child.State);
+                    int newPathCost = currentNode.PathCost + 2; // Incremento de custo por movimento
                     if (!closedSet.Contains(childStateString))
-                        openSet.Enqueue(child, child.HeuristicValue);
+                        //f(n) = g(n) + h(n)
+                        //f(n) = custo do caminho + custo da heuristica
+                        openSet.Enqueue(child, newPathCost + child.HeuristicValue);
                 }
             }
 
@@ -61,5 +65,7 @@ namespace RestaUm.algoritimos
 
             return null;
         }
+
+
     }
 }
