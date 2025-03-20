@@ -243,7 +243,7 @@ public class Algorithm
 
                             int newPathCost = currentNode.PathCost + 1; // custo definido para o movimento
                                                                         // Heurística de centralidade: soma das distâncias dos pinos ao centro
-                            int newHeuristic = Heuristica.Distance(newBoard);
+                            int newHeuristic = Heuristica.Centrality(newBoard);
                             var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newHeuristic);
 
                             // Enfileira o novo nó usando f(n) = g(n) + h(n)
