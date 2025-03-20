@@ -1,5 +1,3 @@
-
-
 namespace RestaUm.Algorithms
 {
     //não faço ideia do porque os namespaces estão zuados
@@ -8,6 +6,8 @@ namespace RestaUm.Algorithms
     using RestaUm.Helpers;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+
     public class NewAlgorithm
     {
         #region Common Utility Methods
@@ -17,8 +17,14 @@ namespace RestaUm.Algorithms
         /// </summary>
         private static void ShowProgress(int iteration)
         {
-            if (iteration % 500 == 0)
-                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / 500) % 4] + $" Iterations: {iteration}");
+            if (iteration % Config.ProgressUpdateInterval == 0)
+                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / Config.ProgressUpdateInterval) % 4] + $" Iterations: {iteration}");
+
+            // Check for timeout or max iterations
+            if (Config.MaxIterations > 0 && iteration >= Config.MaxIterations)
+            {
+                throw new TimeoutException($"Algorithm exceeded maximum iterations limit of {Config.MaxIterations}");
+            }
         }
 
         /// <summary>
@@ -70,11 +76,11 @@ namespace RestaUm.Algorithms
         /// <summary>
         /// Print solution found message with iteration count and node path
         /// </summary>
-        private static void PrintSolutionFound(string algorithmName, int iteration, Node node)
+        private static void PrintSolutionFound(string algorithmName, int iteration, GameState state)
         {
             Console.WriteLine($"\nSolution found with {algorithmName}!");
             Console.WriteLine($"--- Iterations: {iteration} ---");
-            //Helpers.PrintSolution(node);
+            Helpers.PrintSolution(state);
         }
 
         #endregion
@@ -87,22 +93,28 @@ namespace RestaUm.Algorithms
         public static bool AStar(
             int[,] initialBoard,
             int initialPegCount,
-            bool checkForHashValues = false,
             Func<int[,], int> heuristicFunction = null)
         {
-            // Use CountPegs as default heuristic if none provided
-            heuristicFunction ??= Heuristica.CountPegs;
+            // Use default heuristic from config if none provided
+            heuristicFunction ??= Config.DefaultAStarHeuristic;
 
-            var queue = new PriorityQueue<State, int>();
+            var queue = new PriorityQueue<GameState, int>();
             var visited = new HashSet<string>();
             var visitedHash = new HashSet<string>();
+            var stopwatch = new Stopwatch();
 
-            var initialState = new State(
-                initialBoard,
-                initialPegCount,
-                0,
-                Game.GenerateBoardHashes(initialBoard));
+            stopwatch.Start();
 
+            var initialState = new GameState(
+                board: initialBoard,
+                pegCount: initialPegCount,
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: heuristicFunction(initialBoard));
+
+            initialState.UpdateHeuristic(heuristicFunction);
             queue.Enqueue(initialState, initialState.HeuristicValue);
 
             int iteration = 0;
@@ -112,7 +124,14 @@ namespace RestaUm.Algorithms
                 iteration++;
                 var currentState = queue.Dequeue();
 
-                if (currentState.PegCount == 1)
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
+                {
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
                 {
                     PrintSolutionFound("A*", iteration, currentState.Board);
                     return true;
@@ -126,23 +145,27 @@ namespace RestaUm.Algorithms
 
                 visited.Add(boardKey);
 
-                if (checkForHashValues && visitedHash.Contains(boardHash))
+                if (Config.CheckHashValues && visitedHash.Contains(boardHash))
                     continue;
 
                 visitedHash.Add(boardHash);
 
                 // Expand all valid moves
-                foreach (var (newBoard, _) in ExpandMoves(currentState.Board))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
                     int newPegCount = currentState.PegCount - 1;
                     string newBoardHash = Game.GenerateBoardHashes(newBoard);
 
-                    var newState = new State(
-                        newBoard,
-                        newPegCount,
-                        currentState.MovesSoFar + 1,
-                        newBoardHash);
+                    var newState = new GameState(
+                        board: newBoard,
+                        pegCount: newPegCount,
+                        parent: currentState,
+                        action: move,
+                        pathCost: currentState.PathCost + Config.DefaultMoveCost,
+                        hash: newBoardHash,
+                        heuristicValue: heuristicFunction(newBoard));
 
+                    newState.UpdateHeuristic(heuristicFunction);
                     queue.Enqueue(newState, newState.HeuristicValue);
                 }
 
@@ -158,62 +181,77 @@ namespace RestaUm.Algorithms
         /// </summary>
         public static bool BestFirstSearch(
             int[,] initialBoard,
-            bool checkForHashValues = false,
             Func<int[,], int> heuristicFunction = null)
         {
-            // Use CountPegs as default heuristic if none provided
-            heuristicFunction ??= Heuristica.CountPegs;
+            // Use default heuristic from config if none provided
+            heuristicFunction ??= Config.DefaultGreedyHeuristic;
 
-            var frontier = new PriorityQueue<Node, int>();
+            var frontier = new PriorityQueue<GameState, int>();
             var explored = new HashSet<string>();
             var exploredHash = new HashSet<string>();
+            var stopwatch = new Stopwatch();
 
-            var initialNode = new Node(
-                initialBoard,
-                null,
-                (0, 0, 0, 0),
-                0,
-                heuristicFunction(initialBoard));
+            stopwatch.Start();
 
-            frontier.Enqueue(initialNode, initialNode.HeuristicValue);
+            var initialState = new GameState(
+                board: initialBoard,
+                pegCount: Heuristica.CountPegs(initialBoard),
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: heuristicFunction(initialBoard));
+
+            frontier.Enqueue(initialState, initialState.HeuristicValue);
 
             int iteration = 0;
 
             while (frontier.Count > 0)
             {
                 iteration++;
-                var currentNode = frontier.Dequeue();
+                var currentState = frontier.Dequeue();
 
-                if (IsSolution(currentNode.State))
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
                 {
-                    PrintSolutionFound("Best First Search", iteration, currentNode);
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
+                {
+                    PrintSolutionFound("Best First Search", iteration, currentState);
                     return true;
                 }
 
-                string boardKey = Helpers.BoardToString(currentNode.State);
-                string boardHash = Game.GenerateBoardHashes(currentNode.State);
+                string boardKey = Helpers.BoardToString(currentState.Board);
+                string boardHash = Game.GenerateBoardHashes(currentState.Board);
 
                 if (explored.Contains(boardKey))
                     continue;
 
-                if (checkForHashValues && exploredHash.Contains(boardHash))
+                if (Config.CheckHashValues && exploredHash.Contains(boardHash))
                     continue;
 
                 explored.Add(boardKey);
                 exploredHash.Add(boardHash);
 
                 // Expand all valid moves
-                foreach (var (newBoard, move) in ExpandMoves(currentNode.State))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
-                    int newPathCost = currentNode.PathCost + 1;
-                    var newNode = new Node(
-                        newBoard,
-                        currentNode,
-                        move,
-                        newPathCost,
-                        heuristicFunction(newBoard));
+                    int newPathCost = currentState.PathCost + Config.DefaultMoveCost;
+                    int newHeuristic = heuristicFunction(newBoard);
 
-                    frontier.Enqueue(newNode, newNode.HeuristicValue);
+                    var newState = new GameState(
+                        board: newBoard,
+                        pegCount: Heuristica.CountPegs(newBoard),
+                        parent: currentState,
+                        action: move,
+                        pathCost: newPathCost,
+                        hash: Game.GenerateBoardHashes(newBoard),
+                        heuristicValue: newHeuristic);
+
+                    frontier.Enqueue(newState, newState.HeuristicValue);
                 }
 
                 ShowProgress(iteration);
@@ -228,59 +266,77 @@ namespace RestaUm.Algorithms
         /// </summary>
         public static bool AStarWeightedHeuristic(
             int[,] initialBoard,
-            double weight = 1.0,
+            double weight = 0,
             Func<int[,], int> heuristicFunction = null)
         {
-            // Use Centrality as default heuristic if none provided
-            heuristicFunction ??= Heuristica.Centrality;
+            // Use default weight from config if not specified
+            if (weight <= 0)
+                weight = Config.DefaultWeight;
 
-            // Create the root node
-            var rootNode = new Node(
-                initialBoard,
-                null,
-                (0, 0, 0, 0),
-                0,
-                heuristicFunction(initialBoard));
+            // Use default heuristic from config if none provided
+            heuristicFunction ??= Config.DefaultWeightedAStarHeuristic;
 
-            var frontier = new PriorityQueue<Node, double>();
+            // Create the root state
+            var rootState = new GameState(
+                board: initialBoard,
+                pegCount: Heuristica.CountPegs(initialBoard),
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: heuristicFunction(initialBoard));
+
+            var frontier = new PriorityQueue<GameState, double>();
             var explored = new HashSet<string>();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
 
             // f(n) = g(n) + weight * h(n)
-            frontier.Enqueue(rootNode, rootNode.PathCost + weight * rootNode.HeuristicValue);
+            frontier.Enqueue(rootState, rootState.PathCost + weight * rootState.HeuristicValue);
 
             int iteration = 0;
             while (frontier.Count > 0)
             {
                 iteration++;
-                var currentNode = frontier.Dequeue();
+                var currentState = frontier.Dequeue();
 
-                if (IsSolution(currentNode.State))
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
                 {
-                    PrintSolutionFound("A* Weighted", iteration, currentNode);
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
+                {
+                    PrintSolutionFound("A* Weighted", iteration, currentState);
                     return true;
                 }
 
-                string boardKey = Helpers.BoardToString(currentNode.State);
+                string boardKey = Helpers.BoardToString(currentState.Board);
                 if (explored.Contains(boardKey))
                     continue;
 
                 explored.Add(boardKey);
 
                 // Expand all valid moves
-                foreach (var (newBoard, move) in ExpandMoves(currentNode.State))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
-                    int newPathCost = currentNode.PathCost + 1;
+                    int newPathCost = currentState.PathCost + Config.DefaultMoveCost;
                     int newHeuristic = heuristicFunction(newBoard);
 
-                    var newNode = new Node(
-                        newBoard,
-                        currentNode,
-                        move,
-                        newPathCost,
-                        newHeuristic);
+                    var newState = new GameState(
+                        board: newBoard,
+                        pegCount: Heuristica.CountPegs(newBoard),
+                        parent: currentState,
+                        action: move,
+                        pathCost: newPathCost,
+                        hash: Game.GenerateBoardHashes(newBoard),
+                        heuristicValue: newHeuristic);
 
                     // f(n) = g(n) + weight * h(n)
-                    frontier.Enqueue(newNode, newNode.PathCost + weight * newNode.HeuristicValue);
+                    frontier.Enqueue(newState, newState.PathCost + weight * newState.HeuristicValue);
                 }
 
                 ShowProgress(iteration);
@@ -298,65 +354,77 @@ namespace RestaUm.Algorithms
             Func<int[,], int> primaryHeuristic = null,
             Func<int[,], int> secondaryHeuristic = null)
         {
-            // Use Centrality as primary heuristic if none provided
-            primaryHeuristic ??= Heuristica.Centrality;
-
-            // Use FutureMobility as secondary heuristic if none provided
-            secondaryHeuristic ??= Helpers.FutureMobility;
+            // Use default heuristics from config if none provided
+            primaryHeuristic ??= Config.DefaultPrimaryHeuristic;
+            secondaryHeuristic ??= Config.DefaultSecondaryHeuristic;
 
             // Calculate the initial heuristics
             int initialPrimaryValue = primaryHeuristic(initialBoard);
             int initialSecondaryValue = secondaryHeuristic(initialBoard);
 
-            // Create the root node
-            var rootNode = new Node(
-                initialBoard,
-                null,
-                (0, 0, 0, 0),
-                0,
-                initialPrimaryValue);
+            // Create the root state
+            var rootState = new GameState(
+                board: initialBoard,
+                pegCount: Heuristica.CountPegs(initialBoard),
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: initialPrimaryValue);
 
             // Priority queue with tuple priority: (primary, secondary, cost)
-            var frontier = new PriorityQueue<Node, (int, int, int)>();
+            var frontier = new PriorityQueue<GameState, (int, int, int)>();
             var explored = new HashSet<string>();
+            var stopwatch = new Stopwatch();
 
-            frontier.Enqueue(rootNode, (initialPrimaryValue, initialSecondaryValue, rootNode.PathCost));
+            stopwatch.Start();
+
+            frontier.Enqueue(rootState, (initialPrimaryValue, initialSecondaryValue, rootState.PathCost));
 
             int iteration = 0;
             while (frontier.Count > 0)
             {
                 iteration++;
-                var currentNode = frontier.Dequeue();
+                var currentState = frontier.Dequeue();
 
-                if (IsSolution(currentNode.State))
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
                 {
-                    PrintSolutionFound("Ordered Search", iteration, currentNode);
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
+                {
+                    PrintSolutionFound("Ordered Search", iteration, currentState);
                     return true;
                 }
 
-                string boardKey = Helpers.BoardToString(currentNode.State);
+                string boardKey = Helpers.BoardToString(currentState.Board);
                 if (explored.Contains(boardKey))
                     continue;
 
                 explored.Add(boardKey);
 
                 // Expand all valid moves
-                foreach (var (newBoard, move) in ExpandMoves(currentNode.State))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
-                    int newPathCost = currentNode.PathCost + 1;
+                    int newPathCost = currentState.PathCost + Config.DefaultMoveCost;
                     int newPrimaryValue = primaryHeuristic(newBoard);
                     int newSecondaryValue = secondaryHeuristic(newBoard);
 
-                    var newNode = new Node(
-                        newBoard,
-                        currentNode,
-                        move,
-                        newPathCost,
-                        newPrimaryValue);
+                    var newState = new GameState(
+                        board: newBoard,
+                        pegCount: Heuristica.CountPegs(newBoard),
+                        parent: currentState,
+                        action: move,
+                        pathCost: newPathCost,
+                        hash: Game.GenerateBoardHashes(newBoard),
+                        heuristicValue: newPrimaryValue);
 
-                    currentNode.Children.Add(newNode);
+                    currentState.Children.Add(newState);
 
-                    frontier.Enqueue(newNode, (newPrimaryValue, newSecondaryValue, newPathCost));
+                    frontier.Enqueue(newState, (newPrimaryValue, newSecondaryValue, newPathCost));
                 }
 
                 ShowProgress(iteration);
@@ -371,10 +439,21 @@ namespace RestaUm.Algorithms
         /// </summary>
         public static bool BreadthFirstSearch(int[,] initialBoard, int initialPegCount)
         {
-            var queue = new Queue<State>();
+            var queue = new Queue<GameState>();
             var visited = new HashSet<string>();
+            var stopwatch = new Stopwatch();
 
-            var initialState = new State(initialBoard, initialPegCount, 0);
+            stopwatch.Start();
+
+            var initialState = new GameState(
+                board: initialBoard,
+                pegCount: initialPegCount,
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: 0);
+
             string initialKey = Helpers.BoardToString(initialBoard);
 
             visited.Add(initialKey);
@@ -387,14 +466,21 @@ namespace RestaUm.Algorithms
                 iteration++;
                 var currentState = queue.Dequeue();
 
-                if (currentState.PegCount == 1)
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
+                {
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
                 {
                     PrintSolutionFound("BFS", iteration, currentState.Board);
                     return true;
                 }
 
                 // Expand all valid moves
-                foreach (var (newBoard, _) in ExpandMoves(currentState.Board))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
                     int newPegCount = currentState.PegCount - 1;
                     string boardKey = Helpers.BoardToString(newBoard);
@@ -403,7 +489,14 @@ namespace RestaUm.Algorithms
                     if (!visited.Contains(boardKey))
                     {
                         visited.Add(boardKey);
-                        var newState = new State(newBoard, newPegCount, currentState.MovesSoFar + 1);
+                        var newState = new GameState(
+                            board: newBoard,
+                            pegCount: newPegCount,
+                            parent: currentState,
+                            action: move,
+                            pathCost: currentState.PathCost + Config.DefaultMoveCost,
+                            hash: Game.GenerateBoardHashes(newBoard),
+                            heuristicValue: 0);
                         queue.Enqueue(newState);
                     }
                 }
@@ -420,10 +513,21 @@ namespace RestaUm.Algorithms
         /// </summary>
         public static bool DepthFirstSearch(int[,] initialBoard, int initialPegCount)
         {
-            var stack = new Stack<State>();
+            var stack = new Stack<GameState>();
             var visited = new HashSet<string>();
+            var stopwatch = new Stopwatch();
 
-            var initialState = new State(initialBoard, initialPegCount, 0);
+            stopwatch.Start();
+
+            var initialState = new GameState(
+                board: initialBoard,
+                pegCount: initialPegCount,
+                parent: null,
+                action: (0, 0, 0, 0),
+                pathCost: 0,
+                hash: Game.GenerateBoardHashes(initialBoard),
+                heuristicValue: 0);
+
             stack.Push(initialState);
 
             int iteration = 0;
@@ -433,7 +537,14 @@ namespace RestaUm.Algorithms
                 iteration++;
                 var currentState = stack.Pop();
 
-                if (currentState.PegCount == 1)
+                // Check for timeout
+                if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
+                {
+                    Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                    return false;
+                }
+
+                if (currentState.IsSolution())
                 {
                     PrintSolutionFound("DFS", iteration, currentState.Board);
                     return true;
@@ -446,10 +557,17 @@ namespace RestaUm.Algorithms
                 visited.Add(boardKey);
 
                 // Expand all valid moves
-                foreach (var (newBoard, _) in ExpandMoves(currentState.Board))
+                foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
                 {
                     int newPegCount = currentState.PegCount - 1;
-                    var newState = new State(newBoard, newPegCount, currentState.MovesSoFar + 1);
+                    var newState = new GameState(
+                        board: newBoard,
+                        pegCount: newPegCount,
+                        parent: currentState,
+                        action: move,
+                        pathCost: currentState.PathCost + Config.DefaultMoveCost,
+                        hash: Game.GenerateBoardHashes(newBoard),
+                        heuristicValue: 0);
                     stack.Push(newState);
                 }
 
@@ -464,10 +582,12 @@ namespace RestaUm.Algorithms
         /// Recursive Backtracking Search algorithm
         /// </summary>
         private static int backtrackingIterationCount = 0;
+        private static Stopwatch backtrackingStopwatch = new Stopwatch();
 
         public static bool SolveBacktracking(int[,] initialBoard, int initialPegCount)
         {
             backtrackingIterationCount = 0;
+            backtrackingStopwatch.Restart();
             var visited = new HashSet<string>();
             bool result = BacktrackingSearch(initialBoard, initialPegCount, visited);
 
@@ -480,6 +600,20 @@ namespace RestaUm.Algorithms
         private static bool BacktrackingSearch(int[,] board, int pegCount, HashSet<string> visited)
         {
             backtrackingIterationCount++;
+
+            // Check for timeout
+            if (Config.TimeoutMs > 0 && backtrackingStopwatch.ElapsedMilliseconds > Config.TimeoutMs)
+            {
+                Console.WriteLine($"\nAlgorithm timed out after {backtrackingStopwatch.ElapsedMilliseconds}ms");
+                return false;
+            }
+
+            // Check for iteration limit
+            if (Config.MaxIterations > 0 && backtrackingIterationCount > Config.MaxIterations)
+            {
+                Console.WriteLine($"\nAlgorithm exceeded maximum iterations limit of {Config.MaxIterations}");
+                return false;
+            }
 
             if (pegCount == 1)
             {
@@ -499,7 +633,7 @@ namespace RestaUm.Algorithms
                 if (BacktrackingSearch(newBoard, pegCount - 1, visited))
                     return true;
 
-                if (backtrackingIterationCount % 10 == 0)
+                if (backtrackingIterationCount % Config.ProgressUpdateInterval == 0)
                     ShowProgress(backtrackingIterationCount);
             }
 

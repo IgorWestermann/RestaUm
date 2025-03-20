@@ -22,9 +22,10 @@ int pegCount = Heuristica.CountPegs(board);
 int distance = Heuristica.Distance(board);
 Node root = null;
 
-// Original algorithms
-//Console.WriteLine("Running original implementations...");
-//Console.WriteLine("---------------------------------");
+
+ExecutarAlgoritmosOtimizados();
+
+return 0;
 
 bool executando = true;
 
@@ -38,8 +39,10 @@ while (executando)
     Console.WriteLine("5. SolveBacktracking");
     Console.WriteLine("6. DepthFirstSearch");
     Console.WriteLine("7. BreadthFirstSearch");
-    Console.WriteLine("8. Limpar console");
-    Console.WriteLine("9. Sair");
+    Console.WriteLine("8. OptimizedBFSBitmask");
+    Console.WriteLine("9. Limpar console");
+    Console.WriteLine("10. Sair");
+    Console.WriteLine("11. Executar algoritmos otimizados");
     Console.Write("Escolha uma opção: ");
 
     string? opcao = Console.ReadLine();
@@ -95,14 +98,22 @@ while (executando)
             Console.WriteLine("BreadthFirstSearch executado.");
             break;
 
-
         case "8":
-            Console.Clear();
+            PegSolitaireOptimized.OptimizedBFSBitmask(board, pegCount);
+            Console.WriteLine("OptimizedBFSBitmask executado.");
             break;
 
         case "9":
+            Console.Clear();
+            break;
+
+        case "10":
             executando = false;
             Console.WriteLine("Encerrando o aplicativo...");
+            break;
+
+        case "11":
+            ExecutarAlgoritmosOtimizados();
             break;
 
         default:
@@ -111,65 +122,57 @@ while (executando)
     }
     Console.WriteLine();
 }
-//Console.WriteLine("Heuristica CountPegs");
-//Algorithm.AStar(board, pegCount, true);
 
-//Console.WriteLine("Guloso com Heuristica CountPegs");
-//Algorithm.BestFirstSearch(board);
+void ExecutarAlgoritmosOtimizados()
+{
+    Console.WriteLine("\nRunning new optimized implementations...");
+    Console.WriteLine("---------------------------------");
 
-//Console.WriteLine("Heuristica Centralidade, para o Aloritimo A*");
-//Algorithm.AStarCentrality(board, out root);
+    // Configure algorithm parameters
+    Console.WriteLine("Setting algorithm configuration...");
+    Config.ProgressUpdateInterval = 500; // Show progress more frequently
+    Config.MaxIterations = 1000000; // Limit iterations to prevent infinite loops
+    Config.TimeoutMs = 2 * 60000; // 5 seconds timeout per algorithm
+    Config.CheckHashValues = true; // Enable hash-based duplicate detection
+    Config.DefaultMoveCost = 1; // Cost per move
 
-//Console.WriteLine("Heuristica Centralidade, para o Aloritimo A* com peso `infinito`");
-//Algorithm.AStarWeightedCentrality(board, Double.MaxValue);
+    // Display configuration
+    Console.WriteLine($"Max iterations: {Config.MaxIterations}");
+    Console.WriteLine($"Timeout: {Config.TimeoutMs}ms");
+    Console.WriteLine($"Hash detection: {Config.CheckHashValues}");
+    Console.WriteLine("---------------------------------");
 
-//Console.WriteLine("heuristica centralidade, para o aloritimo ordenada");
-//Algorithm.OrderedSearch(board, out root);
+    // A* with default CountPegs heuristic
+    Console.WriteLine("New A* with CountPegs heuristic:");
+    NewAlgorithm.AStar(board, pegCount);
 
-//Console.WriteLine("Heuristica Centralidade, para o Aloritimo Gulosa");
-//Algorithm.GreedySearch(board);
+    // Best First Search with Centrality heuristic
+    Console.WriteLine("New Best First Search with Centrality heuristic:");
+    Config.DefaultGreedyHeuristic = Heuristica.Centrality; // Change the default heuristic
+    NewAlgorithm.BestFirstSearch(board);
 
-//Console.WriteLine("Busca Backtracking");
-//Algorithm.SolveBacktracking(board, pegCount);
+    // A* with weighted Centrality heuristic
+    Console.WriteLine("New A* with weighted Centrality heuristic:");
+    NewAlgorithm.AStarWeightedHeuristic(board, 1.5);
 
-//Console.WriteLine("Algoritmo de profundidade");
-//Algorithm.DepthFirstSearch(board, pegCount);
+    // Ordered Search with Centrality as primary and FutureMobility as secondary heuristic
+    Console.WriteLine("New Ordered Search with multiple heuristics:");
+    NewAlgorithm.OrderedSearch(board);
 
-//Console.WriteLine("Algoritmo de largura");
-//Algorithm.BreadthFirstSearch(board, pegCount);
+    // Breadth First Search
+    Console.WriteLine("New Breadth First Search:");
+    NewAlgorithm.BreadthFirstSearch(board, pegCount);
 
-//Console.WriteLine("Algoritmo de largura otimizado");
-//PegSolitaireOptimized.OptimizedBFSBitmask(board, pegCount);
+    // Depth First Search
+    Console.WriteLine("New Depth First Search:");
+    NewAlgorithm.DepthFirstSearch(board, pegCount);
 
-//Test new optimized implementations(uncomment to use)
+    // Backtracking Search
+    Console.WriteLine("New Backtracking Search:");
+    NewAlgorithm.SolveBacktracking(board, pegCount);
 
-Console.WriteLine("\nRunning new optimized implementations...");
-Console.WriteLine("---------------------------------");
+    // Optimized BFS with Bitmask
+    Console.WriteLine("New Optimized BFS with Bitmask:");
+    NewAlgorithm.OptimizedBFSBitmask(board, pegCount);
+}
 
- //A* with default CountPegs heuristic
-Console.WriteLine("New A* with CountPegs heuristic:");
-NewAlgorithm.AStar(board, pegCount, true);
-
- //Best First Search with Centrality heuristic
-Console.WriteLine("New Best First Search with Centrality heuristic:");
-NewAlgorithm.BestFirstSearch(board, false, Heuristica.Centrality);
-
- //A* with weighted Centrality heuristic
-Console.WriteLine("New A* with weighted Centrality heuristic:");
-NewAlgorithm.AStarWeightedHeuristic(board, 1.5, Heuristica.Centrality);
-
- //Ordered Search with Centrality as primary and FutureMobility as secondary heuristic
-Console.WriteLine("New Ordered Search with multiple heuristics:");
-NewAlgorithm.OrderedSearch(board);
-
- //Breadth First Search
-//Console.WriteLine("New Breadth First Search:");
-//NewAlgorithm.BreadthFirstSearch(board, pegCount);
-
- //Depth First Search
-Console.WriteLine("New Depth First Search:");
-NewAlgorithm.DepthFirstSearch(board, pegCount);
-
- //Backtracking Search
-Console.WriteLine("New Backtracking Search:");
-NewAlgorithm.SolveBacktracking(board, pegCount);

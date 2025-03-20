@@ -45,6 +45,26 @@ namespace RestaUm.Helpers
             }
         }
 
+        public static void PrintSolution(GameState node)
+        {
+            var path = new List<GameState>();
+            while (node != null)
+            {
+                path.Add(node);
+                node = node.Parent;
+            }
+
+            path.Reverse();
+
+            Console.WriteLine("Solution Path:");
+            foreach (var n in path)
+            {
+                Console.WriteLine($"Move: {n.Action}");
+                PrintBoard(n.Board);
+                Console.WriteLine();
+            }
+        }
+
         // M�todo para exportar a �rvore de busca para um arquivo DOT
         public static void ExportSearchTreeToDOT(Node root, string filePath)
         {
