@@ -1,4 +1,5 @@
-﻿using RestaUm.Helpers;
+﻿using System;
+using RestaUm.Helpers;
 using RestaUm;
 
 int[,] board = new int[7, 7]
@@ -17,6 +18,90 @@ Helpers.PrintBoard(board);
 int pegCount = Heuristica.CountPegs(board);
 int distance = Heuristica.Distance(board);
 Node root = null;
+
+bool executando = true;
+
+while (executando)
+{
+    Console.WriteLine("===== Menu de Algoritmos =====");
+    Console.WriteLine("1. AStarCentrality");
+    Console.WriteLine("2. AStarWeightedCentrality");
+    Console.WriteLine("3. OrderedSearch");
+    Console.WriteLine("4. GreedySearch");
+    Console.WriteLine("5. SolveBacktracking");
+    Console.WriteLine("6. DepthFirstSearch");
+    Console.WriteLine("7. BreadthFirstSearch");
+    Console.WriteLine("8. Sair");
+    Console.WriteLine("9. Limpar console");
+    Console.Write("Escolha uma opção: ");
+
+    string? opcao = Console.ReadLine();
+    Console.WriteLine();
+
+    switch (opcao)
+    {
+        case "1":
+            Algorithm.AStarCentrality(board, out root);
+            Console.WriteLine("AStarCentrality executado.");
+            break;
+
+        case "2":
+            Console.Write("Digite o valor para AStarWeightedCentrality (ou 'inf' para Double.MaxValue): ");
+            string? entrada = Console.ReadLine();
+            double parametro;
+            if (entrada?.Trim().ToLower() == "inf")
+            {
+                parametro = double.MaxValue;
+            }
+            else if (!double.TryParse(entrada, out parametro))
+            {
+                Console.WriteLine("Valor inválido. Será utilizado Double.MaxValue.");
+                parametro = double.MaxValue;
+            }
+            Algorithm.AStarWeightedCentrality(board, parametro);
+            Console.WriteLine($"AStarWeightedCentrality executado com o valor: {parametro}");
+            break;
+
+        case "3":
+            Algorithm.OrderedSearch(board, out root);
+            Console.WriteLine("OrderedSearch executado.");
+            break;
+
+        case "4":
+            Algorithm.GreedySearch(board);
+            Console.WriteLine("GreedySearch executado.");
+            break;
+
+        case "5":
+            Algorithm.SolveBacktracking(board, pegCount);
+            Console.WriteLine("SolveBacktracking executado.");
+            break;
+
+        case "6":
+            Algorithm.DepthFirstSearch(board, pegCount);
+            Console.WriteLine("DepthFirstSearch executado.");
+            break;
+
+        case "7":
+            Algorithm.BreadthFirstSearch(board, pegCount);
+            Console.WriteLine("BreadthFirstSearch executado.");
+            break;
+
+        case "8":
+            executando = false;
+            Console.WriteLine("Encerrando o aplicativo...");
+            break;
+
+        case "9":
+            Console.Clear();
+            break;
+
+        default:
+            Console.WriteLine("Opção inválida. Tente novamente.");
+            break;
+    }
+    Console.WriteLine();
+}
 
 
 /* A*
