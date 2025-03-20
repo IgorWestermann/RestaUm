@@ -14,6 +14,7 @@ int[,] board = new int[7, 7]
 };
 
 Helpers.PrintBoard(board);
+Console.WriteLine("\n");
 
 int pegCount = Heuristica.CountPegs(board);
 int distance = Heuristica.Distance(board);
@@ -31,8 +32,8 @@ while (executando)
     Console.WriteLine("5. SolveBacktracking");
     Console.WriteLine("6. DepthFirstSearch");
     Console.WriteLine("7. BreadthFirstSearch");
-    Console.WriteLine("8. Sair");
-    Console.WriteLine("9. Limpar console");
+    Console.WriteLine("8. Limpar console");
+    Console.WriteLine("9. Sair");
     Console.Write("Escolha uma opção: ");
 
     string? opcao = Console.ReadLine();
@@ -43,6 +44,7 @@ while (executando)
         case "1":
             Algorithm.AStarCentrality(board, out root);
             Console.WriteLine("AStarCentrality executado.");
+            Helpers.ExportSearchTreeToDOT(root, "searchTreeCentrality.dot");
             break;
 
         case "2":
@@ -87,13 +89,14 @@ while (executando)
             Console.WriteLine("BreadthFirstSearch executado.");
             break;
 
+
         case "8":
-            executando = false;
-            Console.WriteLine("Encerrando o aplicativo...");
+            Console.Clear();
             break;
 
         case "9":
-            Console.Clear();
+            executando = false;
+            Console.WriteLine("Encerrando o aplicativo...");
             break;
 
         default:
