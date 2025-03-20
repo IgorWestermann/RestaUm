@@ -6,18 +6,18 @@ namespace RestaUm.algoritimos
     public class BestFirstSearchSolver
     {
 
-        public static bool Solve(int[,] initialBoard, Func<int[,], int> heuristica, string name)
+        public static bool Solve(int[,] initialBoard, Func<int[,], int> heuristica, string name, out Node rootNode)
         {
             var frontier = new PriorityQueue<Node, int>();
             var explored = new HashSet<string>();
 
-            var initialState = new Node(initialBoard, null, (0, 0, 0, 0), 0, heuristica(initialBoard));
+            rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, heuristica(initialBoard));
 
             int iteration = 0;
             int totalNodes = 0;
             var stopwatch = Stopwatch.StartNew();
 
-            frontier.Enqueue(initialState, initialState.HeuristicValue);
+            frontier.Enqueue(rootNode, rootNode.HeuristicValue);
 
             while (frontier.Count > 0)
             {
