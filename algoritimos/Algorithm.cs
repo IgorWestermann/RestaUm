@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class Algorithm
 {
     //TODO: Nao usar
-    public static bool AStar(int[,] initialBoard, int initialPegCount)
+    public static bool AStar(int[,] initialBoard, int initialPegCount, bool checkForHashValues = false)
     {
         var queue = new PriorityQueue<State, int>();
         var visited = new HashSet<string>();
