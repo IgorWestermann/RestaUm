@@ -4,11 +4,9 @@ using RestaUm.Helpers;
 using System;
 using System.Collections.Generic;
 
-public class Algorithm
-{
+public class Algorithm {
     //TODO: Nao usar
-    public static bool AStar(int[,] initialBoard, int initialPegCount)
-    {
+    public static bool AStar(int[,] initialBoard, int initialPegCount) {
         var queue = new PriorityQueue<State, int>();
 
         var visited = new HashSet<string>();
@@ -18,13 +16,11 @@ public class Algorithm
 
         int iteration = 0;
 
-        while (queue.Count > 0)
-        {
+        while (queue.Count > 0) {
             iteration++;
             var currentState = queue.Dequeue();
 
-            if (currentState.PegCount == 1)
-            {
+            if (currentState.PegCount == 1) {
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Console.WriteLine("\nSolution found!");
                 Helpers.PrintBoard(currentState.Board);
@@ -34,21 +30,16 @@ public class Algorithm
 
             string boardKey = Helpers.BoardToString(currentState.Board);
 
-            if (visited.Contains(boardKey))
-            {
+            if (visited.Contains(boardKey)) {
                 continue;
             }
 
             visited.Add(boardKey);
 
-            for (int x = 0; x < 7; x++)
-            {
-                for (int y = 0; y < 7; y++)
-                {
-                    foreach (var (dx, dy) in Game.directions)
-                    {
-                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
-                        {
+            for (int x = 0; x < 7; x++) {
+                for (int y = 0; y < 7; y++) {
+                    foreach (var (dx, dy) in Game.directions) {
+                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy)) {
                             var newBoard = (int[,])currentState.Board.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
@@ -70,8 +61,7 @@ public class Algorithm
 
     //TODO: Nao usar
     // Implementação do Algoritimo Guloso, com a Heuristic de contar pecas
-    public static bool BestFirstSearch(int[,] initialBoard)
-    {
+    public static bool BestFirstSearch(int[,] initialBoard) {
         var frontier = new PriorityQueue<Node, int>();
 
         var explored = new HashSet<string>();
@@ -82,14 +72,12 @@ public class Algorithm
 
         frontier.Enqueue(initialState, initialState.HeuristicValue);
 
-        while (frontier.Count > 0)
-        {
+        while (frontier.Count > 0) {
             iteration++;
 
             var currentNode = frontier.Dequeue();
 
-            if (Heuristica.CountPegs(currentNode.State!) == 1)
-            {
+            if (Heuristica.CountPegs(currentNode.State!) == 1) {
                 Console.WriteLine("Solution found!");
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Helpers.PrintSolution(currentNode);
@@ -103,14 +91,10 @@ public class Algorithm
 
             explored.Add(boardKey);
 
-            for (int x = 0; x < 7; x++)
-            {
-                for (int y = 0; y < 7; y++)
-                {
-                    foreach (var (dx, dy) in Game.directions)
-                    {
-                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy))
-                        {
+            for (int x = 0; x < 7; x++) {
+                for (int y = 0; y < 7; y++) {
+                    foreach (var (dx, dy) in Game.directions) {
+                        if (Game.IsValidMove(currentNode.State, x, y, dx, dy)) {
                             var newBoard = (int[,])currentNode.State.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
@@ -133,9 +117,9 @@ public class Algorithm
     // Implementação da Busca Ordenada usando a heurística de centralidade com critério de desempate baseado em mobilidade futura
     public static bool OrderedSearch(int[,] initialBoard, out Node rootNode) {
         // Calcula a heurística primária: centralidade (soma das distâncias Manhattan dos pinos até o centro)
-        int initialCentrality = Heuristica.Centrality(initialBoard);
+        int initialCost = 0;
         // Cria o nó raiz com custo 0 e heurística definida pela centralidade
-        rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, initialCentrality);
+        rootNode = new Node(initialBoard, null, (0, 0, 0, 0), 0, initialCost);
 
         // Calcula a mobilidade futura para o estado inicial
         int initialFutureMobility = Helpers.FutureMobility(initialBoard);
@@ -148,7 +132,7 @@ public class Algorithm
         var frontier = new PriorityQueue<Node, (int, int, int)>();
         var explored = new HashSet<string>();
 
-        frontier.Enqueue(rootNode, (initialCentrality, initialFutureMobility, rootNode.PathCost));
+        frontier.Enqueue(rootNode, (initialCost, initialFutureMobility, rootNode.PathCost));
         int iteration = 0;
 
         while (frontier.Count > 0) {
@@ -179,17 +163,15 @@ public class Algorithm
                             Game.MakeMove(newBoard, x, y, dx, dy);
 
                             int newPathCost = currentNode.PathCost + 2;
-                            // Nova heurística baseada na centralidade
-                            int newCentrality = Heuristica.Centrality(newBoard);
                             // Calcula a mobilidade futura para o novo estado
                             int newFutureMobility = Helpers.FutureMobility(newBoard);
 
-                            var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, newCentrality);
+                            var newNode = new Node(newBoard, currentNode, (x, y, dx, dy), newPathCost, 0);
                             // Adiciona o novo nó como filho do nó atual (para construir a árvore de busca)
                             currentNode.Children.Add(newNode);
 
-                            // Enfileira o novo nó: (centralidade, mobilidade futura, custo)
-                            frontier.Enqueue(newNode, (newCentrality, newFutureMobility, newNode.PathCost));
+                            // Enfileira o novo nó: ( 0 ,mobilidade futura, custo)
+                            frontier.Enqueue(newNode, (newNode.HeuristicValue, newFutureMobility, newNode.PathCost));
                         }
                     }
                 }
@@ -380,8 +362,7 @@ public class Algorithm
 
 
     //Algoritmo de busca em profundidade
-    public static bool DepthFirstSearch(int[,] initialBoard, int initialPegCount)
-    {
+    public static bool DepthFirstSearch(int[,] initialBoard, int initialPegCount) {
         // Pilha para armazenar os estados a serem explorados (DFS)
         var stack = new Stack<State>();
 
@@ -394,14 +375,12 @@ public class Algorithm
 
         int iteration = 0;
 
-        while (stack.Count > 0)
-        {
+        while (stack.Count > 0) {
             iteration++;
             var currentState = stack.Pop();
 
             // Verifica se a solução foi encontrada (apenas 1 pino restante)
-            if (currentState.PegCount == 1)
-            {
+            if (currentState.PegCount == 1) {
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Console.WriteLine("\nSolution found!");
                 Helpers.PrintBoard(currentState.Board);
@@ -416,14 +395,10 @@ public class Algorithm
             visited.Add(boardKey);
 
             // Expande os movimentos válidos a partir do estado atual
-            for (int x = 0; x < 7; x++)
-            {
-                for (int y = 0; y < 7; y++)
-                {
-                    foreach (var (dx, dy) in Game.directions)
-                    {
-                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
-                        {
+            for (int x = 0; x < 7; x++) {
+                for (int y = 0; y < 7; y++) {
+                    foreach (var (dx, dy) in Game.directions) {
+                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy)) {
                             // Clona o tabuleiro e realiza o movimento
                             var newBoard = (int[,])currentState.Board.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
@@ -444,8 +419,7 @@ public class Algorithm
 
     //Busca em Largura sem otimização
 
-    public static bool BreadthFirstSearch(int[,] initialBoard, int initialPegCount)
-    {
+    public static bool BreadthFirstSearch(int[,] initialBoard, int initialPegCount) {
         // Fila FIFO para armazenar os estados a serem explorados
         var queue = new Queue<State>();
         // Conjunto para armazenar estados já visitados (usamos a representação em string do tabuleiro)
@@ -459,14 +433,12 @@ public class Algorithm
 
         int iteration = 0;
 
-        while (queue.Count > 0)
-        {
+        while (queue.Count > 0) {
             iteration++;
             var currentState = queue.Dequeue();
 
             // Verifica se a solução foi encontrada: apenas 1 pino restante
-            if (currentState.PegCount == 1)
-            {
+            if (currentState.PegCount == 1) {
                 Console.WriteLine($"\n--- Iterations: {iteration} ---");
                 Console.WriteLine("\nSolution found!");
                 Helpers.PrintBoard(currentState.Board);
@@ -475,15 +447,11 @@ public class Algorithm
             }
 
             // Para cada posição do tabuleiro
-            for (int x = 0; x < 7; x++)
-            {
-                for (int y = 0; y < 7; y++)
-                {
+            for (int x = 0; x < 7; x++) {
+                for (int y = 0; y < 7; y++) {
                     // Para cada direção possível
-                    foreach (var (dx, dy) in Game.directions)
-                    {
-                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
-                        {
+                    foreach (var (dx, dy) in Game.directions) {
+                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy)) {
                             // Clona o tabuleiro e realiza o movimento
                             var newBoard = (int[,])currentState.Board.Clone();
                             Game.MakeMove(newBoard, x, y, dx, dy);
@@ -492,8 +460,7 @@ public class Algorithm
                             // Gera a chave do novo estado
                             string boardKey = Helpers.BoardToString(newBoard);
                             // Só enfileira se o estado não foi visitado ainda
-                            if (!visited.Contains(boardKey))
-                            {
+                            if (!visited.Contains(boardKey)) {
                                 visited.Add(boardKey);
                                 var newState = new State(newBoard, newPegCount, currentState.MovesSoFar + 1);
                                 queue.Enqueue(newState);
@@ -513,14 +480,12 @@ public class Algorithm
 
     public static int iterationCount = 0;
 
-    private static bool BacktrackingSearch(int[,] board, int pegCount, HashSet<string> visited)
-    {
+    private static bool BacktrackingSearch(int[,] board, int pegCount, HashSet<string> visited) {
         // Incrementa o contador de iterações a cada chamada recursiva
         iterationCount++;
 
         // Condição de sucesso: apenas 1 pino restante
-        if (pegCount == 1)
-        {
+        if (pegCount == 1) {
             Console.WriteLine("Solution found!");
             Helpers.PrintBoard(board);
             Console.WriteLine($"\n--- Iterations: {iterationCount} ---");
@@ -535,14 +500,10 @@ public class Algorithm
         visited.Add(boardKey);
 
         // Tenta cada movimento válido no tabuleiro
-        for (int x = 0; x < 7; x++)
-        {
-            for (int y = 0; y < 7; y++)
-            {
-                foreach (var (dx, dy) in Game.directions)
-                {
-                    if (Game.IsValidMove(board, x, y, dx, dy))
-                    {
+        for (int x = 0; x < 7; x++) {
+            for (int y = 0; y < 7; y++) {
+                foreach (var (dx, dy) in Game.directions) {
+                    if (Game.IsValidMove(board, x, y, dx, dy)) {
                         var newBoard = (int[,])board.Clone();
                         Game.MakeMove(newBoard, x, y, dx, dy);
 
@@ -557,8 +518,7 @@ public class Algorithm
     }
 
     // Função wrapper para iniciar a busca com backtracking
-    public static bool SolveBacktracking(int[,] initialBoard, int initialPegCount)
-    {
+    public static bool SolveBacktracking(int[,] initialBoard, int initialPegCount) {
         iterationCount = 0; // Reseta o contador de iterações
         var visited = new HashSet<string>();
         bool result = BacktrackingSearch(initialBoard, initialPegCount, visited);
