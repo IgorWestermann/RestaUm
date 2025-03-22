@@ -3,6 +3,7 @@ namespace RestaUm
     using RestaUm.Game;
     using RestaUm.Helpers;
     using System;
+    using System.IO;
 
     /// <summary>
     /// Static configuration class that centralizes parameters for algorithm implementations
@@ -63,12 +64,12 @@ namespace RestaUm
         /// <summary>
         /// Maximum iterations before timing out (0 means no limit)
         /// </summary>
-        public static int MaxIterations { get; private set; } = -1;
+        public static int MaxIterations { get; private set; } = 1000000;
 
         /// <summary>
         /// Maximum time in milliseconds before timing out (0 means no limit)
         /// </summary>
-        public static int TimeoutMs { get; private set; } = -1;
+        public static int TimeoutMs { get; private set; } = 3 * 60000;
 
         /// <summary>
         /// Whether to check for hash values to detect symmetric board positions
@@ -82,7 +83,7 @@ namespace RestaUm
         /// <summary>
         /// Whether to enable verbose logging
         /// </summary>
-        public static bool VerboseLogging = false;
+        public static bool VerboseLogging = true;
 
         /// <summary>
         /// Whether to export search trees to DOT format for visualization
@@ -120,10 +121,60 @@ namespace RestaUm
 
         #endregion
 
+        #region Configuration Methods
 
-        public static void UseHashVerification(bool b)
+        /// <summary>
+        /// Set hash verification option
+        /// </summary>
+        public static void UseHashVerification(bool value)
         {
-            Config.CheckHashValues = b;
+            CheckHashValues = value;
         }
+
+        /// <summary>
+        /// Set the number of algorithm iterations
+        /// </summary>
+        public static void SetAlgorithmIterations(int value)
+        {
+            AlgorithmIterations = value;
+        }
+
+        /// <summary>
+        /// Set the maximum number of iterations before timing out
+        /// </summary>
+        public static void SetMaxIterations(int value)
+        {
+            MaxIterations = value;
+        }
+
+        /// <summary>
+        /// Set the timeout value in milliseconds
+        /// </summary>
+        public static void SetTimeoutMs(int value)
+        {
+            TimeoutMs = value;
+        }
+
+        /// <summary>
+        /// Set the progress update interval
+        /// </summary>
+        public static void SetProgressUpdateInterval(int value)
+        {
+            ProgressUpdateInterval = value;
+        }
+
+        /// <summary>
+        /// Configure visualization settings
+        /// </summary>
+        public static void ConfigureForVisualization()
+        {
+            SetAlgorithmIterations(1);
+            SetMaxIterations(10000000);
+            SetTimeoutMs(100000);
+            UseHashVerification(false);
+            SetProgressUpdateInterval(50);
+        }
+
+        #endregion
     }
 }

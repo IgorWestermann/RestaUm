@@ -1,0 +1,243 @@
+# Algorithm Performance Analysis Report
+Generated on: 20/03/2025 20:26:56
+
+## Test Configuration
+- Algorithm Iterations: 1
+- Max Iterations Limit: 10000000
+- Timeout: 10000ms
+- Default Move Cost: 1
+- Progress Update Interval: 50
+
+## Executive Summary
+This report compares the performance of various search algorithms for the Peg Solitaire puzzle with and without hash verification. Hash verification helps detect symmetric board positions to avoid redundant exploration.
+
+### Performance Summary
+| Algorithm | Hash Verification | Success Rate | Avg Time (ms) | Avg Iterations | Avg Solution Depth |
+|-----------|-------------------|--------------|---------------|----------------|-------------------|
+| A* | Enabled | 1/1 (100%) | 280 | 2509 | 31,0 |
+| A* | Disabled | 1/1 (100%) | 261 | 2206 | 31,0 |
+| Best First Search | Enabled | 0/1 (0%) | 10001 | 229598 | N/A |
+| Best First Search | Disabled | 1/1 (100%) | 3802 | 538086 | 31,0 |
+| A* Weighted | Enabled | 0/1 (0%) | 10001 | 245672 | N/A |
+| A* Weighted | Disabled | 0/1 (0%) | 10001 | 272629 | N/A |
+| Ordered Search | Enabled | 0/1 (0%) | 10001 | 233105 | N/A |
+| Ordered Search | Disabled | 0/1 (0%) | 10001 | 240266 | N/A |
+| Depth First Search | Enabled | 1/1 (100%) | 1234 | 30785 | 31,0 |
+| Depth First Search | Disabled | 1/1 (100%) | 1346 | 30785 | 31,0 |
+| Backtracking | Enabled | 1/1 (100%) | 265 | 2313 | 31,0 |
+| Backtracking | Disabled | 1/1 (100%) | 247 | 2313 | 31,0 |
+| Breadth First Search | Enabled | 0/1 (0%) | 10001 | 63272 | N/A |
+| Breadth First Search | Disabled | 0/1 (0%) | 10001 | 58801 | N/A |
+
+### Hash Verification Impact
+| Algorithm | Time Difference | Iteration Difference | Memory/State Savings |
+|-----------|-----------------|----------------------|---------------------|
+| A* | 19ms slower with hash (7% degradation) | 303 more iterations with hash (12% increase) | No memory savings |
+| Best First Search | 6199ms slower with hash (62% degradation) | 308488 fewer iterations with hash (57% reduction) | ~308488 states avoided |
+| A* Weighted | -0ms slower with hash (-0% degradation) | 26957 fewer iterations with hash (10% reduction) | ~26957 states avoided |
+| Ordered Search | -0ms slower with hash (-0% degradation) | 7161 fewer iterations with hash (3% reduction) | ~7161 states avoided |
+| Depth First Search | 112ms faster with hash (8% improvement) | -0 more iterations with hash (-0% increase) | No memory savings |
+| Backtracking | 18ms slower with hash (7% degradation) | -0 more iterations with hash (-0% increase) | No memory savings |
+| Breadth First Search | -0ms slower with hash (-0% degradation) | 4471 more iterations with hash (7% increase) | No memory savings |
+
+## Detailed Algorithm Results
+
+### A*
+#### With Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 280ms, Min = 280ms, Max = 280ms
+- **Iterations**: Avg = 2509, Min = 2509, Max = 2509
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 280 | 2509 | Yes | 31 |
+
+#### Without Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 261ms, Min = 261ms, Max = 261ms
+- **Iterations**: Avg = 2206, Min = 2206, Max = 2206
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 261 | 2206 | Yes | 31 |
+
+#### Analysis
+- Hash verification made the algorithm **19ms slower** (7% degradation).
+- With hash verification, the algorithm explored **303 more states** (12% increase).
+- Success rate remained the same with hash verification.
+
+### Best First Search
+#### With Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 229598, Min = 229598, Max = 229598
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 229598 | No | N/A |
+
+#### Without Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 3802ms, Min = 3802ms, Max = 3802ms
+- **Iterations**: Avg = 538086, Min = 538086, Max = 538086
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 3802 | 538086 | Yes | 31 |
+
+#### Analysis
+- Hash verification made the algorithm **6199ms slower** (62% degradation).
+- With hash verification, the algorithm explored **308488 fewer states** (57% reduction).
+- Success rate decreased with hash verification.
+
+### A* Weighted
+#### With Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 245672, Min = 245672, Max = 245672
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 245672 | No | N/A |
+
+#### Without Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 272629, Min = 272629, Max = 272629
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 272629 | No | N/A |
+
+#### Analysis
+- Hash verification made the algorithm **-0ms slower** (-0% degradation).
+- With hash verification, the algorithm explored **26957 fewer states** (10% reduction).
+- Success rate remained the same with hash verification.
+
+### Ordered Search
+#### With Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 233105, Min = 233105, Max = 233105
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 233105 | No | N/A |
+
+#### Without Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 240266, Min = 240266, Max = 240266
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 240266 | No | N/A |
+
+#### Analysis
+- Hash verification made the algorithm **-0ms slower** (-0% degradation).
+- With hash verification, the algorithm explored **7161 fewer states** (3% reduction).
+- Success rate remained the same with hash verification.
+
+### Depth First Search
+#### With Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 1234ms, Min = 1234ms, Max = 1234ms
+- **Iterations**: Avg = 30785, Min = 30785, Max = 30785
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 1234 | 30785 | Yes | 31 |
+
+#### Without Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 1346ms, Min = 1346ms, Max = 1346ms
+- **Iterations**: Avg = 30785, Min = 30785, Max = 30785
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 1346 | 30785 | Yes | 31 |
+
+#### Analysis
+- Hash verification made the algorithm **112ms faster** (8% improvement).
+- With hash verification, the algorithm explored **-0 more states** (-0% increase).
+- Success rate remained the same with hash verification.
+
+### Backtracking
+#### With Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 265ms, Min = 265ms, Max = 265ms
+- **Iterations**: Avg = 2313, Min = 2313, Max = 2313
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 265 | 2313 | Yes | 31 |
+
+#### Without Hash Verification
+- **Success Rate**: 1/1 (100%)
+- **Execution Time**: Avg = 247ms, Min = 247ms, Max = 247ms
+- **Iterations**: Avg = 2313, Min = 2313, Max = 2313
+- **Solution Depth**: Avg = 31,0, Min = 31, Max = 31
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 247 | 2313 | Yes | 31 |
+
+#### Analysis
+- Hash verification made the algorithm **18ms slower** (7% degradation).
+- With hash verification, the algorithm explored **-0 more states** (-0% increase).
+- Success rate remained the same with hash verification.
+
+### Breadth First Search
+#### With Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 63272, Min = 63272, Max = 63272
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 63272 | No | N/A |
+
+#### Without Hash Verification
+- **Success Rate**: 0/1 (0%)
+- **Execution Time**: Avg = 10001ms, Min = 10001ms, Max = 10001ms
+- **Iterations**: Avg = 58801, Min = 58801, Max = 58801
+
+**Individual Runs:**
+| Run | Time (ms) | Iterations | Found Solution | Solution Depth |
+|-----|-----------|------------|----------------|----------------|
+| 1 | 10001 | 58801 | No | N/A |
+
+#### Analysis
+- Hash verification made the algorithm **-0ms slower** (-0% degradation).
+- With hash verification, the algorithm explored **4471 more states** (7% increase).
+- Success rate remained the same with hash verification.
+
+## Conclusion
+Based on the performance analysis across 7 different search algorithms:
+- **1** algorithms performed better **with** hash verification
+- **3** algorithms performed better **without** hash verification
+- **3** algorithms showed no significant difference
+
+### Key Findings
+1. Hash verification generally reduces the number of states explored, which can lead to performance improvements in algorithms that explore many redundant states.
+2. For some algorithms (especially depth-limited ones), the overhead of hash computation and checking may outweigh the benefits of avoiding redundant states.
+3. The benefit of hash verification tends to increase with longer-running searches where more symmetric positions are encountered.

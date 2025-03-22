@@ -13,16 +13,22 @@ D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.pdb
 D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\RestaUm.genruntimeconfig.cache
 D:\Meus Documentos\Dev\Nova pasta\restaUm\obj\Debug\net8.0\ref\RestaUm.dll
 D:\Meus Documentos\Dev\Nova pasta\RestaUm\obj\Debug\net8.0\RestaUm.sourcelink.json
-C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.AssemblyInfoInputs.cache
-C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.AssemblyInfo.cs
-C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.csproj.CoreCompileInputs.cache
-C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.sourcelink.json
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\RestaUm.exe
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\RestaUm.deps.json
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\RestaUm.runtimeconfig.json
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\RestaUm.dll
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\RestaUm.pdb
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\System.Private.Windows.Core.dll
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\bin\Debug\net8.0\runtimes\win\lib\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.csproj.AssemblyReference.cache
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.AssemblyInfoInputs.cache
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.AssemblyInfo.cs
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.csproj.CoreCompileInputs.cache
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.sourcelink.json
+C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.csproj.Up2Date
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.dll
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\refint\RestaUm.dll
 C:\Users\hugo_\OneDrive\Área de Trabalho\Faculdade\Inteligencia Artificial\RestaUm\obj\Debug\net8.0\RestaUm.pdb

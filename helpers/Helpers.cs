@@ -1,6 +1,8 @@
 namespace RestaUm.Helpers
 {
     using RestaUm.Game;
+    using RestaUm.helpers;
+
     using RestaUm.States;
 
     public class Helpers
@@ -49,10 +51,11 @@ namespace RestaUm.Helpers
             }
         }
 
-        public static void PrintSolution(GameState node)
+        public static void PrintSolution(GameState node, string algorithmName)
         {
+            
 
-            if (!Config.VerboseLogging) return;
+            var imageGenerator = new PegSolitaireImageGenerator("images/" + algorithmName);
 
             var path = new List<GameState>();
             while (node != null)
@@ -64,11 +67,20 @@ namespace RestaUm.Helpers
             path.Reverse();
 
             Console.WriteLine("Solution Path:");
+            int step = 0;
             foreach (var n in path)
             {
-                Console.WriteLine($"Move: {n.Action}");
-                PrintBoard(n.Board);
-                Console.WriteLine();
+                if (!Config.VerboseLogging)
+                {
+                    
+                    Console.WriteLine($"Move: {n.Action}");
+                    PrintBoard(n.Board);
+                    Console.WriteLine();
+                }
+
+                imageGenerator.GenerateImage(n.Board, step);
+                step++;
+
             }
         }
 

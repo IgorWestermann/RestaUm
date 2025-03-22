@@ -9,6 +9,7 @@ namespace RestaUm.Algorithms
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using RestaUm.Visualization;
 
     public class NewAlgorithm
     {
@@ -19,14 +20,14 @@ namespace RestaUm.Algorithms
         /// </summary>
         private static void ShowProgress(int iteration)
         {
-            if (iteration % Config.ProgressUpdateInterval == 0)
-                Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / Config.ProgressUpdateInterval) % 4] + $" Iterations: {iteration}");
+            //if (iteration % Config.ProgressUpdateInterval == 0)
+            //    Console.Write("\r" + new string[] { "|", "/", "-", "\\" }[(iteration / Config.ProgressUpdateInterval) % 4] + $" Iterations: {iteration}");
 
-            // Check for timeout or max iterations
-            if (Config.MaxIterations > 0 && iteration >= Config.MaxIterations)
-            {
-                throw new TimeoutException($"Algorithm exceeded maximum iterations limit of {Config.MaxIterations}");
-            }
+            //// Check for timeout or max iterations
+            //if (Config.MaxIterations > 0 && iteration >= Config.MaxIterations)
+            //{
+            //    throw new TimeoutException($"Algorithm exceeded maximum iterations limit of {Config.MaxIterations}");
+            //}
         }
 
         /// <summary>
@@ -69,39 +70,45 @@ namespace RestaUm.Algorithms
                 Console.WriteLine($"--- Solution Level: {state.Level} ---");
                 Console.WriteLine($"--- Path Cost: {state.PathCost} ---");
                 Console.WriteLine($"--- Final Heuristic Value: {state.HeuristicValue} ---");
-                Helpers.PrintSolution(state);
+                Helpers.PrintSolution(state, algorithmName);
             }
             else if (state?.Board != null)
             {
                 Helpers.PrintBoard(state.Board);
             }
+            Helpers.PrintBoard(state.Board);
         }
 
-        /// <summary>
-        /// Print solution found message with iteration count
-        /// </summary>
-        private static void PrintSolutionFound(string algorithmName, int iteration, int[,] board = null)
-        {
-            Console.WriteLine($"\nSolution found with {algorithmName}!");
-            Console.WriteLine($"--- Iterations: {iteration} ---");
+        // /// <summary>
+        // /// Print solution found message with iteration count
+        // /// </summary>
+        // private static void PrintSolutionFound(string algorithmName, int iteration, int[,] board = null)
+        // {
+        //     Console.WriteLine($"\nSolution found with {algorithmName}!");
+        //     Console.WriteLine($"--- Iterations: {iteration} ---");
 
-            if (board != null)
-                Helpers.PrintBoard(board);
-        }
+        //     if (board != null)
+        //         Helpers.PrintBoard(board);
+        // }
 
-        /// <summary>
-        /// Print solution found message with iteration count and node path
-        /// </summary>
-        private static void PrintSolutionFound(string algorithmName, int iteration, GameState state)
-        {
-            Console.WriteLine($"\nSolution found with {algorithmName}!");
-            Console.WriteLine($"--- Iterations: {iteration} ---");
-            Helpers.PrintSolution(state);
-        }
+        // /// <summary>
+        // /// Print solution found message with iteration count and node path
+        // /// </summary>
+        // private static void PrintSolutionFound(string algorithmName, int iteration, GameState state)
+        // {
+        //     Console.WriteLine($"\nSolution found with {algorithmName}!");
+        //     Console.WriteLine($"--- Iterations: {iteration} ---");
+        //     Helpers.PrintSolution(state, algorithmName);
+        // }
 
         #endregion
 
         #region Search Algorithms
+
+        private static Stopwatch backtrackingStopwatch = new Stopwatch();
+
+        // Track all visited states for visualization
+        private static Dictionary<string, GameState> visitedStates = new Dictionary<string, GameState>();
 
         /// <summary>
         /// A* algorithm with customizable heuristic function
@@ -111,241 +118,343 @@ namespace RestaUm.Algorithms
             int initialPegCount,
             Func<int[,], int> heuristicFunction = null)
         {
-            // Use default heuristic from config if none provided
-            heuristicFunction ??= Config.DefaultAStarHeuristic;
+            string algorithmName = "A* Search";
+            var stats = new AlgorithmStats(algorithmName);
 
-            // Create stats tracker
-            var stats = new AlgorithmStats("A* Search");
-
-            // Run algorithm multiple times based on config
-            for (int run = 0; run < Config.AlgorithmIterations; run++)
+            for (int i = 0; i < Config.AlgorithmIterations; i++)
             {
-                Console.WriteLine($"\nRunning A* Search - Iteration {run + 1}/{Config.AlgorithmIterations}");
-
-                var queue = new PriorityQueue<GameState, int>();
-                var visited = new HashSet<string>();
-                var visitedHash = new HashSet<string>();
-                var stopwatch = new Stopwatch();
-
-                stopwatch.Start();
-
-                var initialState = new GameState(
-                    board: initialBoard,
-                    pegCount: initialPegCount,
-                    parent: null,
-                    action: (0, 0, 0, 0),
-                    pathCost: 0,
-                    hash: Game.GenerateBoardHashes(initialBoard),
-                    heuristicValue: heuristicFunction(initialBoard));
-
-                initialState.UpdateHeuristic(heuristicFunction);
-                queue.Enqueue(initialState, initialState.HeuristicValue);
-
-                int iteration = 0;
+                visitedStates.Clear(); // Reset for each run
+                var stopwatch = Stopwatch.StartNew();
+                GameState solutionState = null;
+                int iterations = 0;
                 bool foundSolution = false;
-                int solutionDepth = 0;
 
                 try
                 {
-                    while (queue.Count > 0)
-                    {
-                        iteration++;
-                        var currentState = queue.Dequeue();
+                    // Initialize algorithm
+                    var frontier = new PriorityQueue<GameState, int>();
+                    var explored = new HashSet<string>();
+                    var exploredHash = new HashSet<string>();
 
-                        // Check for timeout
+                    // Use default heuristic from config if none provided
+                    heuristicFunction ??= Config.DefaultAStarHeuristic;
+
+                    // Create initial state
+                    var initialState = new GameState(
+                        board: initialBoard,
+                        pegCount: initialPegCount,
+                        parent: null,
+                        action: (0, 0, 0, 0),
+                        pathCost: 0,
+                        hash: Game.GenerateBoardHashes(initialBoard),
+                        heuristicValue: heuristicFunction(initialBoard));
+
+                    initialState.UpdateHeuristic(heuristicFunction);
+                    frontier.Enqueue(initialState, initialState.HeuristicValue);
+                    visitedStates[GetStateKey(initialState)] = initialState;
+
+                    while (frontier.Count > 0)
+                    {
+                        iterations++;
+
+                        // Check for timeout or max iterations
                         if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
                         {
-                            Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                            Console.WriteLine($"\nTimeout reached after {iterations} iterations and {stopwatch.ElapsedMilliseconds}ms");
                             break;
                         }
 
-                        if (currentState.IsSolution())
+                        if (Config.MaxIterations > 0 && iterations > Config.MaxIterations)
+                        {
+                            Console.WriteLine($"\nMax iterations ({Config.MaxIterations}) reached after {stopwatch.ElapsedMilliseconds}ms");
+                            break;
+                        }
+
+                        // Get next state
+                        var currentState = frontier.Dequeue();
+
+                        // Check if solution found
+                        if (currentState.PegCount == 1)
                         {
                             foundSolution = true;
-                            solutionDepth = currentState.Level;
-
-                            PrintSolutionFound("A*", iteration, stopwatch, currentState);
-
+                            solutionState = currentState;
+                            PrintSolutionFound(algorithmName, iterations, stopwatch, currentState);
                             break;
                         }
 
+                        // Skip if already explored
                         string boardKey = Helpers.BoardToString(currentState.Board);
-                        string boardHash = Game.GenerateBoardHashes(currentState.Board);
-
-                        if (visited.Contains(boardKey))
+                        if (explored.Contains(boardKey))
                             continue;
 
-                        visited.Add(boardKey);
+                        explored.Add(boardKey);
 
-                        if (Config.CheckHashValues && visitedHash.Contains(boardHash))
-                            continue;
-
-                        visitedHash.Add(boardHash);
-
-                        // Expand all valid moves
-                        foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
+                        // Check hash if enabled
+                        if (Config.CheckHashValues)
                         {
+                            if (exploredHash.Contains(currentState.StateHash))
+                                continue;
+                            exploredHash.Add(currentState.StateHash);
+                        }
+
+                        // Expand this state
+                        ExpandMoves(currentState, frontier, visitedStates);
+
+                        // Show progress periodically
+                        if (iterations % Config.ProgressUpdateInterval == 0)
+                        {
+                            Console.Write($"\r{algorithmName} Iteration {iterations}, Queue: {frontier.Count}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\nError in {algorithmName}: {ex.Message}");
+                }
+                finally
+                {
+                    stopwatch.Stop();
+                }
+
+                // Record statistics
+                stats.RecordIteration(
+                    stopwatch.ElapsedMilliseconds,
+                    iterations,
+                    foundSolution,
+                    foundSolution ? solutionState.Level : 0
+                );
+
+                // Generate visualization if solution found
+                if (foundSolution && solutionState != null)
+                {
+                    GraphvizGenerator.GenerateSolutionPath(algorithmName, solutionState);
+
+                    // Only generate tree for the first successful run to avoid too many files
+                    if (stats.SuccessfulRuns == 1 && visitedStates.Count <= 5000)
+                    {
+                        GraphvizGenerator.GenerateSolutionTree(algorithmName, visitedStates);
+                    }
+                }
+
+                Console.WriteLine($"\nRun {i + 1}/{Config.AlgorithmIterations} - {algorithmName} completed in {stopwatch.ElapsedMilliseconds}ms with {iterations} iterations.");
+            }
+
+            // Print overall summary
+            stats.PrintSummary();
+            return stats;
+        }
+
+        // Helper method to get a unique key for a state
+        private static string GetStateKey(GameState state)
+        {
+            return Helpers.BoardToString(state.Board);
+        }
+
+        // Helper method to expand moves from a state
+        private static void ExpandMoves(GameState currentState, PriorityQueue<GameState, int> frontier, Dictionary<string, GameState> visitedStates)
+        {
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    foreach (var (dx, dy) in Game.directions)
+                    {
+                        if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
+                        {
+                            var newBoard = (int[,])currentState.Board.Clone();
+                            Game.MakeMove(newBoard, x, y, dx, dy);
+
                             int newPegCount = currentState.PegCount - 1;
-                            string newBoardHash = Game.GenerateBoardHashes(newBoard);
+                            int newPathCost = currentState.PathCost + Config.DefaultMoveCost;
 
                             var newState = new GameState(
                                 board: newBoard,
                                 pegCount: newPegCount,
                                 parent: currentState,
-                                action: move,
-                                pathCost: currentState.PathCost + Config.DefaultMoveCost,
-                                hash: newBoardHash,
-                                heuristicValue: heuristicFunction(newBoard));
+                                action: (x, y, dx, dy),
+                                pathCost: newPathCost,
+                                hash: Game.GenerateBoardHashes(newBoard),
+                                heuristicValue: Config.DefaultAStarHeuristic(newBoard));
 
-                            newState.UpdateHeuristic(heuristicFunction);
-                            queue.Enqueue(newState, newState.HeuristicValue);
+                            frontier.Enqueue(newState, newState.HeuristicValue);
+
+                            // Track the state for visualization
+                            string stateKey = GetStateKey(newState);
+                            if (!visitedStates.ContainsKey(stateKey))
+                            {
+                                visitedStates[stateKey] = newState;
+                            }
                         }
-
-                        ShowProgress(iteration);
                     }
                 }
-                catch (TimeoutException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-                stopwatch.Stop();
-
-                // Record statistics
-                stats.RecordIteration(
-                    stopwatch.ElapsedMilliseconds,
-                    iteration,
-                    foundSolution,
-                    solutionDepth);
-
-                if (!foundSolution && run == Config.AlgorithmIterations - 1)
-                    Console.WriteLine("\nNo solution found.");
             }
-
-            // Print performance summary
-            stats.PrintSummary();
-
-            return stats;
         }
 
         /// <summary>
-        /// Best First Search (Greedy) with configurable heuristic
+        /// Best First Search algorithm with custom heuristic function.
         /// </summary>
-        public static AlgorithmStats BestFirstSearch(
-            int[,] initialBoard,
-            Func<int[,], int> heuristicFunction = null)
+        public static AlgorithmStats BestFirstSearch(int[,] initialBoard, Func<int[,], int> heuristicFunction = null)
         {
-            // Use default heuristic from config if none provided
-            heuristicFunction ??= Config.DefaultGreedyHeuristic;
+            // Use default if no heuristic is provided
+            heuristicFunction ??= Heuristica.Centrality;
 
-            // Create stats tracker
-            var stats = new AlgorithmStats("Best First Search");
+            string algorithmName = "BestFirstSearch";
+            var stats = new AlgorithmStats(algorithmName);
 
-            // Run algorithm multiple times based on config
-            for (int run = 0; run < Config.AlgorithmIterations; run++)
+            for (int i = 0; i < Config.AlgorithmIterations; i++)
             {
-                Console.WriteLine($"\nRunning Best First Search - Iteration {run + 1}/{Config.AlgorithmIterations}");
-
-                var frontier = new PriorityQueue<GameState, int>();
-                var explored = new HashSet<string>();
-                var exploredHash = new HashSet<string>();
-                var stopwatch = new Stopwatch();
-
-                stopwatch.Start();
-
-                var initialState = new GameState(
-                    board: initialBoard,
-                    pegCount: Heuristica.CountPegs(initialBoard),
-                    parent: null,
-                    action: (0, 0, 0, 0),
-                    pathCost: 0,
-                    hash: Game.GenerateBoardHashes(initialBoard),
-                    heuristicValue: heuristicFunction(initialBoard));
-
-                frontier.Enqueue(initialState, initialState.HeuristicValue);
-
-                int iteration = 0;
+                visitedStates.Clear(); // Reset for each run
+                var stopwatch = Stopwatch.StartNew();
+                GameState solutionState = null;
+                int iterations = 0;
                 bool foundSolution = false;
-                int solutionDepth = 0;
 
                 try
                 {
+                    // Initialize algorithm
+                    var frontier = new PriorityQueue<GameState, int>();
+                    var explored = new HashSet<string>();
+                    var exploredHash = new HashSet<string>();
+
+                    // Create initial state
+                    var initialState = new GameState(
+                        board: initialBoard,
+                        pegCount: Heuristica.CountPegs(initialBoard),
+                        parent: null,
+                        action: (0, 0, 0, 0),
+                        pathCost: 0,
+                        hash: Config.CheckHashValues ? Game.GenerateBoardHashes(initialBoard) : string.Empty,
+                        heuristicValue: heuristicFunction(initialBoard))
+                    {
+                        Level = 0
+                    };
+
+                    frontier.Enqueue(initialState, initialState.HeuristicValue);
+                    visitedStates[GetStateKey(initialState)] = initialState;
+
                     while (frontier.Count > 0)
                     {
-                        iteration++;
-                        var currentState = frontier.Dequeue();
+                        iterations++;
 
-                        // Check for timeout
+                        // Check for timeout or max iterations
                         if (Config.TimeoutMs > 0 && stopwatch.ElapsedMilliseconds > Config.TimeoutMs)
                         {
-                            Console.WriteLine($"\nAlgorithm timed out after {stopwatch.ElapsedMilliseconds}ms");
+                            Console.WriteLine($"\nTimeout reached after {iterations} iterations and {stopwatch.ElapsedMilliseconds}ms");
                             break;
                         }
 
-                        if (currentState.IsSolution())
+                        if (Config.MaxIterations > 0 && iterations > Config.MaxIterations)
+                        {
+                            Console.WriteLine($"\nMax iterations ({Config.MaxIterations}) reached after {stopwatch.ElapsedMilliseconds}ms");
+                            break;
+                        }
+
+                        // Get next state
+                        var currentState = frontier.Dequeue();
+
+                        // Check if solution found
+                        if (currentState.PegCount == 1)
                         {
                             foundSolution = true;
-                            solutionDepth = currentState.Level;
-
-                            PrintSolutionFound("Best First Search", iteration, stopwatch, currentState);
-
+                            solutionState = currentState;
+                            PrintSolutionFound(algorithmName, iterations, stopwatch, currentState);
                             break;
                         }
 
+                        // Skip if already explored
                         string boardKey = Helpers.BoardToString(currentState.Board);
-                        string boardHash = Game.GenerateBoardHashes(currentState.Board);
-
                         if (explored.Contains(boardKey))
                             continue;
 
-                        if (Config.CheckHashValues && exploredHash.Contains(boardHash))
-                            continue;
-
                         explored.Add(boardKey);
-                        exploredHash.Add(boardHash);
 
-                        // Expand all valid moves
-                        foreach (var (newBoard, move) in ExpandMoves(currentState.Board))
+                        // Check hash if enabled
+                        if (Config.CheckHashValues)
                         {
-                            int newPathCost = currentState.PathCost + Config.DefaultMoveCost;
-                            int newHeuristic = heuristicFunction(newBoard);
-
-                            var newState = new GameState(
-                                board: newBoard,
-                                pegCount: Heuristica.CountPegs(newBoard),
-                                parent: currentState,
-                                action: move,
-                                pathCost: newPathCost,
-                                hash: Game.GenerateBoardHashes(newBoard),
-                                heuristicValue: newHeuristic);
-
-                            frontier.Enqueue(newState, newState.HeuristicValue);
+                            if (exploredHash.Contains(currentState.StateHash))
+                                continue;
+                            exploredHash.Add(currentState.StateHash);
                         }
 
-                        ShowProgress(iteration);
+                        // Expand valid moves
+                        for (int x = 0; x < 7; x++)
+                        {
+                            for (int y = 0; y < 7; y++)
+                            {
+                                foreach (var (dx, dy) in Game.directions)
+                                {
+                                    if (Game.IsValidMove(currentState.Board, x, y, dx, dy))
+                                    {
+                                        var newBoard = (int[,])currentState.Board.Clone();
+                                        Game.MakeMove(newBoard, x, y, dx, dy);
+
+                                        int newPegCount = currentState.PegCount - 1;
+                                        var newState = new GameState(
+                                            board: newBoard,
+                                            pegCount: newPegCount,
+                                            parent: currentState,
+                                            action: (x, y, dx, dy),
+                                            pathCost: currentState.PathCost + Config.DefaultMoveCost,
+                                            hash: Config.CheckHashValues ? Game.GenerateBoardHashes(newBoard) : string.Empty,
+                                            heuristicValue: heuristicFunction(newBoard))
+                                        {
+                                            Level = currentState.Level + 1
+                                        };
+
+                                        frontier.Enqueue(newState, newState.HeuristicValue);
+
+                                        // Track for visualization
+                                        string stateKey = GetStateKey(newState);
+                                        if (!visitedStates.ContainsKey(stateKey))
+                                        {
+                                            visitedStates[stateKey] = newState;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Show progress periodically
+                        if (iterations % Config.ProgressUpdateInterval == 0)
+                        {
+                            Console.Write($"\r{algorithmName} Iteration {iterations}, Queue: {frontier.Count}");
+                        }
                     }
                 }
-                catch (TimeoutException e)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine($"\nError in {algorithmName}: {ex.Message}");
                 }
-
-                stopwatch.Stop();
+                finally
+                {
+                    stopwatch.Stop();
+                }
 
                 // Record statistics
                 stats.RecordIteration(
                     stopwatch.ElapsedMilliseconds,
-                    iteration,
+                    iterations,
                     foundSolution,
-                    solutionDepth);
+                    foundSolution ? solutionState.Level : 0
+                );
 
-                if (!foundSolution && run == Config.AlgorithmIterations - 1)
-                    Console.WriteLine("\nNo solution found.");
+                // Generate visualization if solution found
+                if (foundSolution && solutionState != null)
+                {
+                    GraphvizGenerator.GenerateSolutionPath(algorithmName, solutionState);
+
+                    // Only generate tree for the first successful run to avoid too many files
+                    if (stats.SuccessfulRuns == 1 && visitedStates.Count <= 5000)
+                    {
+                        GraphvizGenerator.GenerateSolutionTree(algorithmName, visitedStates);
+                    }
+                }
+
+                Console.WriteLine($"\nRun {i + 1}/{Config.AlgorithmIterations} - {algorithmName} completed in {stopwatch.ElapsedMilliseconds}ms with {iterations} iterations.");
             }
 
-            // Print performance summary
+            // Print overall summary
             stats.PrintSummary();
-
             return stats;
         }
 
@@ -817,7 +926,6 @@ namespace RestaUm.Algorithms
         /// Recursive Backtracking Search algorithm
         /// </summary>
         private static int backtrackingIterationCount = 0;
-        private static Stopwatch backtrackingStopwatch = new Stopwatch();
         private static bool backtrackingSolutionFound = false;
         private static int backtrackingSolutionDepth = 0;
 

@@ -37,6 +37,7 @@ public class AlgorithmAnalyzer
     /// </summary>
     public void RunAllAlgorithms()
     {
+        Directory.CreateDirectory("reports");
 
         Console.WriteLine("===== Starting Performance Analysis =====");
         Console.WriteLine("Running all algorithms with and without hash verification");
@@ -94,12 +95,12 @@ public class AlgorithmAnalyzer
         _results["Backtracking"] = (backtrackingWithHash, backtrackingWithoutHash);
 
         // BFS
-        // Console.WriteLine("Testing Breadth First Search algorithm...");
-        // Config.UseHashVerification(true);
-        // var breadthFirstWithHash = NewAlgorithm.BreadthFirstSearch(_board, _pegCount);
-        // Config.UseHashVerification(false);
-        // var breadthFirstWithoutHash = NewAlgorithm.BreadthFirstSearch(_board, _pegCount);
-        // _results["Breadth First Search"] = (breadthFirstWithHash, breadthFirstWithoutHash);
+        Console.WriteLine("Testing Breadth First Search algorithm...");
+        Config.UseHashVerification(true);
+        var breadthFirstWithHash = NewAlgorithm.BreadthFirstSearch(_board, _pegCount);
+        Config.UseHashVerification(false);
+        var breadthFirstWithoutHash = NewAlgorithm.BreadthFirstSearch(_board, _pegCount);
+        _results["Breadth First Search"] = (breadthFirstWithHash, breadthFirstWithoutHash);
 
         Console.WriteLine("All algorithms have been tested!");
     }
@@ -307,8 +308,8 @@ public class AlgorithmAnalyzer
         sb.AppendLine("3. The benefit of hash verification tends to increase with longer-running searches where more symmetric positions are encountered.");
 
         // Write the report to the file
-        File.WriteAllText(_outputFilePath, sb.ToString());
-
+        Directory.CreateDirectory(_outputFilePath);
+        File.WriteAllText(_outputFilePath + "/report", sb.ToString());
         Console.WriteLine($"Performance report successfully generated at: {_outputFilePath}");
     }
 }

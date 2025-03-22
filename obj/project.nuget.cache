@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "nbSVEyUa4Ss=",
+  "dgSpecHash": "j5RSbtrwfO4=",
   "success": true,
   "projectFilePath": "C:\\Users\\hugo_\\OneDrive\\Área de Trabalho\\Faculdade\\Inteligencia Artificial\\RestaUm\\RestaUm.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\hugo_\\.nuget\\packages\\microsoft.win32.systemevents\\9.0.3\\microsoft.win32.systemevents.9.0.3.nupkg.sha512",
+    "C:\\Users\\hugo_\\.nuget\\packages\\system.drawing.common\\9.0.3\\system.drawing.common.9.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RestaUm")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bd590119f534809100f7d5124893ea0a4a85a6f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+795457518eac92ad7db4922a1dc8d637d6bc0ace")]
 [assembly: System.Reflection.AssemblyProductAttribute("RestaUm")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RestaUm")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
